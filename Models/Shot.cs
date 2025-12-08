@@ -1,4 +1,4 @@
-﻿namespace Battleship;
+﻿namespace Battleship.Models;
 
 public partial class Shot
 {
@@ -11,6 +11,8 @@ public partial class Shot
     public int X { get; set; }
 
     public int Y { get; set; }
+
+    public ShotOutcome Outcome { get; set; }
 
     public virtual Game Game { get; set; } = null!;
 

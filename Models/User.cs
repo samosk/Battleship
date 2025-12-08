@@ -1,4 +1,4 @@
-﻿namespace Battleship;
+﻿namespace Battleship.Models;
 
 public partial class User
 {

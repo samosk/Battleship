@@ -1,4 +1,4 @@
-﻿namespace Battleship;
+﻿namespace Battleship.Models;
 
 public partial class Ship
 {
@@ -11,6 +11,10 @@ public partial class Ship
     public int X { get; set; }
 
     public int Y { get; set; }
+
+    public ShipOrientation Orientation { get; set; }
+
+    public ShipType Type { get; set; }
 
     public virtual Game Game { get; set; } = null!;
 

@@ -1,4 +1,4 @@
-﻿namespace Battleship;
+﻿namespace Battleship.Models;
 
 public partial class Game
 {
@@ -17,6 +17,8 @@ public partial class Game
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? ModifiedAt { get; set; }
+
+    public GameState State { get; set; }
 
     public virtual User ActiveUser { get; set; } = null!;
 
