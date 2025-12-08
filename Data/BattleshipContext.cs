@@ -101,12 +101,17 @@ public partial class BattleshipContext : DbContext
 
             entity.Property(e => e.ShipId).HasColumnName("ship_id");
             entity.Property(e => e.GameId).HasColumnName("game_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.X).HasColumnName("x");
             entity.Property(e => e.Y).HasColumnName("y");
 
             entity.HasOne(d => d.Game).WithMany(p => p.Ships)
                 .HasForeignKey(d => d.GameId)
                 .HasConstraintName("ship_game_id_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Ships)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("ship_user_id_fkey");
         });
 
         modelBuilder.Entity<Shot>(entity =>
