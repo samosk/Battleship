@@ -11,9 +11,9 @@ public enum ShipType
 {
     CARRIER,
     BATTLESHIP,
-    CRUISER,
+    DESTROYER,
     SUBMARINE,
-    DESTROYER
+    PATROL_BOAT
 }
 
 public enum ShipOrientation
@@ -24,7 +24,7 @@ public enum ShipOrientation
 
 public enum ShotOutcome
 {
-    MISS,
     HIT,
+    MISS,
     SINK
 }

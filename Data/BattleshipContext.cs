@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Battleship.Models;
+using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 namespace Battleship;
 
@@ -51,10 +53,10 @@ public partial class BattleshipContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
-            .HasPostgresEnum("game_state", new[] { "SETUP", "PLAY", "END" })
-            .HasPostgresEnum("ship_orientation", new[] { "VERTICAL", "HORIZONTAL" })
-            .HasPostgresEnum("ship_type", new[] { "CARRIER", "BATTLESHIP", "DESTROYER", "SUBMARINE", "PATROL_BOAT" })
-            .HasPostgresEnum("shot_outcome", new[] { "MISS", "HIT", "SINK" });
+            .HasPostgresEnum<GameState>("game_state")
+            .HasPostgresEnum<ShipOrientation>("ship_orientation")
+            .HasPostgresEnum<ShipType>("ship_type")
+            .HasPostgresEnum<ShotOutcome>("shot_outcome");
 
         modelBuilder.Entity<Game>(entity =>
         {
@@ -76,6 +78,9 @@ public partial class BattleshipContext : DbContext
             entity.Property(e => e.TurnCount).HasColumnName("turn_count");
             entity.Property(e => e.User1Id).HasColumnName("user1_id");
             entity.Property(e => e.User2Id).HasColumnName("user2_id");
+            entity.Property(e => e.State)
+                .HasColumnType("game_state")
+                .HasColumnName("state");
 
             entity.HasOne(d => d.ActiveUser).WithMany(p => p.GameActiveUsers)
                 .HasForeignKey(d => d.ActiveUserId)
@@ -104,6 +109,12 @@ public partial class BattleshipContext : DbContext
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.X).HasColumnName("x");
             entity.Property(e => e.Y).HasColumnName("y");
+            entity.Property(e => e.Orientation)
+                .HasColumnType("ship_orientation")
+                .HasColumnName("orientation");
+            entity.Property(e => e.Type)
+                .HasColumnType("ship_type")
+                .HasColumnName("type");
 
             entity.HasOne(d => d.Game).WithMany(p => p.Ships)
                 .HasForeignKey(d => d.GameId)
@@ -125,6 +136,9 @@ public partial class BattleshipContext : DbContext
             entity.Property(e => e.ShooterUserId).HasColumnName("shooter_user_id");
             entity.Property(e => e.X).HasColumnName("x");
             entity.Property(e => e.Y).HasColumnName("y");
+            entity.Property(e => e.Outcome)
+                .HasColumnType("shot_outcome")
+                .HasColumnName("outcome");
 
             entity.HasOne(d => d.Game).WithMany(p => p.Shots)
                 .HasForeignKey(d => d.GameId)

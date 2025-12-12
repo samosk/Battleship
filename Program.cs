@@ -1,6 +1,7 @@
 using Battleship;
 using Battleship.Models;
 using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,9 +13,7 @@ builder.Services.AddDbContext<BattleshipContext>(options => options.UseNpgsql(
         .MapEnum<GameState>("game_state")
         .MapEnum<ShipType>("ship_type")
         .MapEnum<ShipOrientation>("ship_orientation")
-        .MapEnum<ShotOutcome>("shot_outcome")
-    )
-);
+        .MapEnum<ShotOutcome>("shot_outcome")));
 
 var app = builder.Build();
 
