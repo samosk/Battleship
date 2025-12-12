@@ -47,7 +47,11 @@ public partial class BattleshipContext : DbContext
             throw new InvalidOperationException("No connection string found in user secrets.");
         }
 
-        optionsBuilder.UseNpgsql(connectionString);
+        optionsBuilder.UseNpgsql(connectionString, o => o
+            .MapEnum<GameState>("game_state")
+            .MapEnum<ShipType>("ship_type")
+            .MapEnum<ShipOrientation>("ship_orientation")
+            .MapEnum<ShotOutcome>("shot_outcome"));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

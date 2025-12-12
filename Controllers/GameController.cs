@@ -41,7 +41,7 @@ public class GameController : Controller
             var myShots = context.Shots
                 .Where(s => s.GameId == id && s.ShooterUserId == 1) // TODO: Replace with actual user ID
                 .ToList();
-            
+
             var opponentShots = context.Shots
                 .Where(s => s.GameId == id && s.ShooterUserId == 2) // TODO: Replace with actual user ID
                 .ToList();
