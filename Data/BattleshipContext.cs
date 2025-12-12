@@ -1,33 +1,16 @@
 ﻿using Battleship.Models;
 using Microsoft.EntityFrameworkCore;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 namespace Battleship;
 
 public partial class BattleshipContext : DbContext
 {
-    private readonly IConfiguration? _configuration;
-
     public BattleshipContext()
-    {
-    }
+    { }
 
     public BattleshipContext(DbContextOptions<BattleshipContext> options)
         : base(options)
-    {
-    }
-
-    public BattleshipContext(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
-
-    // new overload to accept both options and configuration (useful for DI)
-    public BattleshipContext(DbContextOptions<BattleshipContext> options, IConfiguration configuration)
-        : base(options)
-    {
-        _configuration = configuration;
-    }
+    { }
 
     public virtual DbSet<Game> Games { get; set; }
 
@@ -37,22 +20,8 @@ public partial class BattleshipContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        // Get connection string from IConfiguration (user secrets)
-        var connectionString = _configuration?.GetConnectionString("Battleship");
-
-        if (string.IsNullOrEmpty(connectionString))
-        {
-            throw new InvalidOperationException("No connection string found in user secrets.");
-        }
-
-        optionsBuilder.UseNpgsql(connectionString, o => o
-            .MapEnum<GameState>("game_state")
-            .MapEnum<ShipType>("ship_type")
-            .MapEnum<ShipOrientation>("ship_orientation")
-            .MapEnum<ShotOutcome>("shot_outcome"));
-    }
+    // OnConfiguring is intentionally removed. DbContext should be configured via
+    // DI in Program.cs with UseNpgsql and the required enum mappings.
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
