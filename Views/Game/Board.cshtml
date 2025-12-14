@@ -27,7 +27,8 @@
                 var startRow = ship.Y;
                 var endRow = ship.Orientation == ShipOrientation.VERTICAL ? startRow + length : startRow + 1;
 
-                <div class="@(ship.IsSunk ? "bg-danger" : "bg-primary")" style="grid-column: @(startColumn) / @(endColumn); grid-row: @(startRow) / @(endRow); margin: 0;">SHIP</div>
+                <div class="@(ship.IsSunk ? "bg-danger" : "bg-primary")"
+                    style="grid-column: @(startColumn) / @(endColumn); grid-row: @(startRow) / @(endRow); margin: 0;">SHIP</div>
             }
 
             @foreach (var shot in Model.OpponentShots)
@@ -37,7 +38,34 @@
                 var startRow = shot.Y;
                 var endRow = startRow + 1;
 
-                <div class="bg-warning" style="grid-column: @(startColumn) / @(endColumn); grid-row: @(startRow) / @(endRow); margin: 0;">SHOT</div>
+                <div class="bg-warning"
+                    style="grid-column: @(startColumn) / @(endColumn); grid-row: @(startRow) / @(endRow); margin: 0;">SHOT</div>
+            }
+        }
+    </div>
+    <div class="grid" id="game-board">
+        @if (Model != null && Model.OpponentSunkShips.Any())
+        {
+            @foreach (var sunkShip in Model.OpponentSunkShips)
+            {
+                var length = sunkShip.Type switch
+                {
+                    ShipType.CARRIER => 5,
+                    ShipType.BATTLESHIP => 4,
+                    ShipType.DESTROYER => 3,
+                    ShipType.SUBMARINE => 3,
+                    ShipType.PATROL_BOAT => 2,
+                    _ => 0
+                };
+
+                var startColumn = sunkShip.X;
+                var endColumn = sunkShip.Orientation == ShipOrientation.HORIZONTAL ? startColumn + length : startColumn + 1;
+                var startRow = sunkShip.Y;
+                var endRow = sunkShip.Orientation == ShipOrientation.VERTICAL ? startRow + length : startRow + 1;
+
+                <div class="@(sunkShip.IsSunk ? "bg-warning" : "bg-primary")"
+                    style="grid-column: @(startColumn) / @(endColumn); grid-row: @(startRow) / @(endRow); margin: 0;">SUNK-SHIP
+                </div>
             }
         }
     </div>
