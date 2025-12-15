@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-using Battleship.Models;
-using System.Security.Cryptography.X509Certificates;
 namespace Battleship.Controllers;
 
 public class GameController : Controller
@@ -71,7 +68,7 @@ public class GameController : Controller
         return View(viewModel);
     }
 
-    private static int GetShipLength(Ship ship)
+    public static int GetShipLength(Ship ship)
     {
         return ship.Type switch
         {
@@ -84,7 +81,12 @@ public class GameController : Controller
         };
     }
 
-    private static List<Position> GetPositionsForShip(Ship ship)
+    public static int GetShipLength(ShipViewModel vm)
+    {
+        return GetShipLength(new Ship(vm));
+    }
+
+    public static List<Position> GetPositionsForShip(Ship ship)
     {
         var positions = new List<Position>();
 
@@ -107,7 +109,7 @@ public class GameController : Controller
         return positions;
     }
 
-    private static bool IsPositionInShip(Position position, Ship ship)
+    public static bool IsPositionInShip(Position position, Ship ship)
     {
         var length = GetShipLength(ship);
 
@@ -119,7 +121,12 @@ public class GameController : Controller
         return (position.X >= xStart) && (position.X <= xEnd) && (position.Y >= yStart) && (position.Y <= yEnd);
     }
 
-    private static bool IsShipSunk(Ship ship, List<Shot> shots)
+    public static bool IsPositionInShip(Position position, ShipViewModel vm)
+    {
+        return IsPositionInShip(position, new Ship(vm));
+    }
+
+    public static bool IsShipSunk(Ship ship, List<Shot> shots)
     {
         return GetPositionsForShip(ship).All(p =>
             shots.Any(s => s.X == p.X && s.Y == p.Y)

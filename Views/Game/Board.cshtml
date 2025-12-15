@@ -1,3 +1,6 @@
+@using Battleship.Models;
+@using Battleship.Controllers;
+
 @model Battleship.Models.BoardViewModel
 
 @{
@@ -17,46 +20,17 @@
                     {
                         @foreach (var ship in Model.MyShips)
                         {
-                            var length = ship.Type switch
-                            {
-                                ShipType.CARRIER => 5,
-                                ShipType.BATTLESHIP => 4,
-                                ShipType.DESTROYER => 3,
-                                ShipType.SUBMARINE => 3,
-                                ShipType.PATROL_BOAT => 2,
-                                _ => 0
-                            };
-                            var startColumn = ship.X;
-                            var endColumn = ship.Orientation == ShipOrientation.HORIZONTAL ? startColumn + length : startColumn + 1;
-                            var startRow = ship.Y;
-                            var endRow = ship.Orientation == ShipOrientation.VERTICAL ? startRow + length : startRow + 1;
                             var bgClass = ship.IsSunk ? "bg-danger" : "bg-primary";
-                            
-                            <div class="@bgClass rounded-1 position-relative" style="grid-column: @(startColumn) / @(endColumn); grid-row: @(startRow) / @(endRow); margin: 2px;"></div>
+                            <div class="@bgClass rounded-1 position-relative" style="grid-column: @(ship.StartColumn) / @(ship.EndColumn); grid-row: @(ship.StartRow) / @(ship.EndRow); margin: 2px;"></div>
                         }
-                        
+
                         @foreach (var shot in Model.OpponentShots)
                         {
-                            var shotHitsSunkShip = Model.MyShips.Where(s => s.IsSunk).Any(ship =>
-                            {
-                                var shipLength = ship.Type switch
-                                {
-                                    ShipType.CARRIER => 5,
-                                    ShipType.BATTLESHIP => 4,
-                                    ShipType.DESTROYER => 3,
-                                    ShipType.SUBMARINE => 3,
-                                    ShipType.PATROL_BOAT => 2,
-                                    _ => 0
-                                };
-                                if (ship.Orientation == ShipOrientation.HORIZONTAL)
-                                {
-                                    return shot.Y == ship.Y && shot.X >= ship.X && shot.X < ship.X + shipLength;
-                                }
-                                else
-                                {
-                                    return shot.X == ship.X && shot.Y >= ship.Y && shot.Y < ship.Y + shipLength;
-                                }
-                            });
+                            var position = new Position { X = shot.X, Y = shot.Y };
+
+                            var shotHitsSunkShip = Model.MyShips
+                                .Where(s => s.IsSunk)
+                                .Any(ship => GameController.IsPositionInShip(position, ship));
 
                             if (!shotHitsSunkShip)
                             {
@@ -77,45 +51,16 @@
                     {
                         @foreach (var sunkShip in Model.OpponentSunkShips)
                         {
-                            var length = sunkShip.Type switch
-                            {
-                                ShipType.CARRIER => 5,
-                                ShipType.BATTLESHIP => 4,
-                                ShipType.DESTROYER => 3,
-                                ShipType.SUBMARINE => 3,
-                                ShipType.PATROL_BOAT => 2,
-                                _ => 0
-                            };
-                            var startColumn = sunkShip.X;
-                            var endColumn = sunkShip.Orientation == ShipOrientation.HORIZONTAL ? startColumn + length : startColumn + 1;
-                            var startRow = sunkShip.Y;
-                            var endRow = sunkShip.Orientation == ShipOrientation.VERTICAL ? startRow + length : startRow + 1;
-                            
-                            <div class="bg-danger rounded-1 position-relative" style="grid-column: @(startColumn) / @(endColumn); grid-row: @(startRow) / @(endRow); margin: 2px;"></div>
+                            <div class="bg-danger rounded-1 position-relative" style="grid-column: @(sunkShip.StartColumn) / @(sunkShip.EndColumn); grid-row: @(sunkShip.StartRow) / @(sunkShip.EndRow); margin: 2px;"></div>
                         }
-                        
+
                         @foreach (var shot in Model.MyShots)
                         {
-                            var shotHitsSunkShip = Model.OpponentSunkShips.Any(ship =>
-                            {
-                                var shipLength = ship.Type switch
-                                {
-                                    ShipType.CARRIER => 5,
-                                    ShipType.BATTLESHIP => 4,
-                                    ShipType.DESTROYER => 3,
-                                    ShipType.SUBMARINE => 3,
-                                    ShipType.PATROL_BOAT => 2,
-                                    _ => 0
-                                };
-                                if (ship.Orientation == ShipOrientation.HORIZONTAL)
-                                {
-                                    return shot.Y == ship.Y && shot.X >= ship.X && shot.X < ship.X + shipLength;
-                                }
-                                else
-                                {
-                                    return shot.X == ship.X && shot.Y >= ship.Y && shot.Y < ship.Y + shipLength;
-                                }
-                            });
+                            var position = new Position { X = shot.X, Y = shot.Y };
+
+                            var shotHitsSunkShip = Model.MyShips
+                                .Where(s => s.IsSunk)
+                                .Any(ship => GameController.IsPositionInShip(position, ship));
 
                             if (!shotHitsSunkShip)
                             {
@@ -150,7 +95,7 @@
         display: grid;
         grid-template-columns: repeat(10, 1fr);
         grid-template-rows: repeat(10, 1fr);
-        background-image: 
+        background-image:
             linear-gradient(to right, #dee2e6 1px, transparent 1px),
             linear-gradient(to bottom, #dee2e6 1px, transparent 1px);
         background-size: 10% 10%;

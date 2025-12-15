@@ -19,4 +19,15 @@ public partial class Ship
     public virtual Game Game { get; set; } = null!;
 
     public virtual User User { get; set; } = null!;
+
+    public Ship()
+    { }
+
+    public Ship(ShipViewModel vm)
+    {
+        X = vm.X;
+        Y = vm.Y;
+        Orientation = vm.Orientation;
+        Type = vm.Type;
+    }
 }

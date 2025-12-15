@@ -8,4 +8,10 @@ public class ShipViewModel
     public required ShipType Type { get; set; }
     public required bool IsMine { get; set; }
     public required bool IsSunk { get; set; }
+
+    public int Length => GameController.GetShipLength(this);
+    public int StartColumn => X;
+    public int EndColumn => Orientation == ShipOrientation.HORIZONTAL ? StartColumn + Length : StartColumn + 1;
+    public int StartRow => Y;
+    public int EndRow => Orientation == ShipOrientation.VERTICAL ? StartRow + Length : StartRow + 1;
 }
