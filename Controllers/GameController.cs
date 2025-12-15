@@ -19,6 +19,7 @@ public class GameController : Controller
         return View();
     }
 
+    [HttpGet]
     public IActionResult Board(int id)
     {
         var game = _context.Games.Find(id);
@@ -69,6 +70,85 @@ public class GameController : Controller
         };
 
         return View(viewModel);
+    }
+
+    [HttpPost]
+    public IActionResult Shoot(int id, BoardViewModel vm)
+    {
+        // Due to difficulties with using multiple view models in the same view, we have gone with a janky solution.
+        // Everything inside BoardViewModel is null except for SelectedShotPosition.
+
+        var game = _context.Games.Find(id);
+        if (game == null) return NotFound();
+        if (vm.SelectedShotPosition == null) return BadRequest();
+
+        if (game.ActiveUserId != 1) // TODO: Replace with actual user ID
+        {
+            return BadRequest("It's not your turn.");
+        }
+
+        var components = vm.SelectedShotPosition.Split(",");
+        int x;
+        int y;
+
+        try
+        {
+            x = int.Parse(components[0]);
+            y = int.Parse(components[1]);
+        }
+        catch (Exception)
+        {
+            return BadRequest();
+        }
+
+        var myShots = _context.Shots
+            .Where(s => s.GameId == id && s.ShooterUserId == 1) // TODO: Replace with actual user ID
+            .ToList();
+
+        if (myShots.Any(s => s.X == x && s.Y == y))
+        {
+            return BadRequest("You have already shot at this position.");
+        }
+
+        var shot = new Shot
+        {
+            GameId = id,
+            ShooterUserId = 1, // TODO: Replace with actual user ID
+            X = x,
+            Y = y
+        };
+
+        var position = new Position { X = x, Y = y };
+
+        var opponentShips = _context.Ships
+            .Where(s => s.GameId == id && s.UserId != 1) // TODO: Replace with actual user ID
+            .ToList();
+
+        if (opponentShips.Any(ship => IsPositionInShip(position, ship)))
+        {
+            shot.Outcome = ShotOutcome.HIT;
+            if (opponentShips.Any(ship => IsShipSunk(ship, myShots.Append(shot).ToList())))
+            {
+                shot.Outcome = ShotOutcome.SINK;
+            }
+        }
+        else
+        {
+            shot.Outcome = ShotOutcome.MISS;
+            if (game.ActiveUserId == game.User1Id)
+            {
+                game.ActiveUserId = game.User2Id;
+            }
+            else
+            {
+                game.ActiveUserId = game.User1Id;
+                game.TurnCount++;
+            }
+        }
+
+        _context.Shots.Add(shot);
+        _context.SaveChanges();
+        return RedirectToAction("Board", new { id });
     }
 
     public static int GetShipLength(Ship ship)

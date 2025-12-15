@@ -7,17 +7,19 @@
     ViewData["Title"] = "Game Board";
 }
 
-<div class="min-vh-100 bg-light py-5 px-3">
-    <h1 class="text-center text-dark fw-light text-uppercase fs-4 mb-5" style="letter-spacing: 0.1em;">Battleship</h1>
+@if (Model != null)
+{
+    <div class="min-vh-100 bg-light py-5 px-3">
+        <h1 class="text-center text-dark fw-light text-uppercase fs-4 mb-5" style="letter-spacing: 0.1em;">
+            @(Model.Game.ActiveUserId == 1 ? "Your Turn" : "Opponent's Turn") <!-- TODO: Replace with actual user ID -->
+        </h1>
 
-    <div class="d-flex flex-wrap justify-content-center gap-5">
-        <!-- My Fleet -->
-        <div class="text-center">
-            <h2 class="text-secondary text-uppercase fs-6 fw-normal mb-3" style="letter-spacing: 0.08em;">My Fleet</h2>
-            <div class="bg-white border rounded-1 p-0 position-relative" style="width: 320px; height: 320px;">
-                <div class="board position-relative w-100 h-100">
-                    @if (Model != null)
-                    {
+        <div class="d-flex flex-wrap justify-content-center gap-5">
+            <!-- My Fleet -->
+            <div class="text-center">
+                <h2 class="text-secondary text-uppercase fs-6 fw-normal mb-3" style="letter-spacing: 0.08em;">My Fleet</h2>
+                <div class="bg-white border rounded-1 p-0 position-relative" style="width: 320px; height: 320px;">
+                    <div class="board position-relative w-100 h-100">
                         @foreach (var ship in Model.MyShips)
                         {
                             var bgClass = ship.IsSunk ? "bg-danger" : "bg-primary";
@@ -37,58 +39,65 @@
                                 <div class="bg-warning rounded-circle position-relative" style="grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1); width: 50%; height: 50%; margin: auto;"></div>
                             }
                         }
-                    }
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Enemy Fleet -->
-        <div class="text-center">
-            <h2 class="text-secondary text-uppercase fs-6 fw-normal mb-3" style="letter-spacing: 0.08em;">Enemy Fleet</h2>
-            <div class="bg-white border rounded-1 p-0 position-relative" style="width: 320px; height: 320px;">
-                <div class="board position-relative w-100 h-100">
-                    @if (Model != null)
-                    {
+            <!-- Enemy Fleet -->
+            <div class="text-center">
+                <h2 class="text-secondary text-uppercase fs-6 fw-normal mb-3" style="letter-spacing: 0.08em;">Enemy Fleet</h2>
+                <div class="bg-white border rounded-1 p-0 position-relative" style="width: 320px; height: 320px;">
+                    <form method="post" action="/Game/Shoot/@Model.Game.GameId" class="board position-relative w-100 h-100">
                         @foreach (var sunkShip in Model.OpponentSunkShips)
-                        {
+                            {
                             <div class="bg-danger rounded-1 position-relative" style="grid-column: @(sunkShip.StartColumn) / @(sunkShip.EndColumn); grid-row: @(sunkShip.StartRow) / @(sunkShip.EndRow); margin: 2px;"></div>
-                        }
+                            }
 
                         @foreach (var shot in Model.MyShots)
-                        {
-                            var position = new Position { X = shot.X, Y = shot.Y };
-
-                            var shotHitsSunkShip = Model.MyShips
-                                .Where(s => s.IsSunk)
-                                .Any(ship => GameController.IsPositionInShip(position, ship));
-
-                            if (!shotHitsSunkShip)
                             {
+                                var position = new Position { X = shot.X, Y = shot.Y };
+
+                                var shotHitsSunkShip = Model.MyShips
+                                    .Where(s => s.IsSunk)
+                                    .Any(ship => GameController.IsPositionInShip(position, ship));
+
+                                if (!shotHitsSunkShip)
+                                {
                                 <div class="bg-warning rounded-circle position-relative" style="grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1); width: 50%; height: 50%; margin: auto;"></div>
+                                }
                             }
-                        }
-                    }
+
+                        @for (int y = 1; y <= 10; y++)
+                            {
+                                @for (int x = 1; x <= 10; x++)
+                                {
+                                <input type="radio" name="SelectedShotPosition" value="@x,@y" class="z-1 opacity-25" style="grid-column: @x / @(x + 1); grid-row: @y / @(y + 1);" />
+                                }
+                            }
+
+                        <button type="submit" class="position-absolute top-100 start-50 translate-middle-x">Shoot</button>
+                    </form>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Legend -->
-    <div class="d-flex justify-content-center gap-4 mt-5">
-        <div class="d-flex align-items-center gap-2">
-            <span class="bg-primary rounded-1" style="width: 16px; height: 16px;"></span>
-            <span class="text-secondary small">Ship</span>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <span class="bg-danger rounded-1" style="width: 16px; height: 16px;"></span>
-            <span class="text-secondary small">Sunk</span>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <span class="bg-warning rounded-circle" style="width: 12px; height: 12px;"></span>
-            <span class="text-secondary small">Shot</span>
+        <!-- Legend -->
+        <div class="d-flex justify-content-center gap-4 mt-5">
+            <div class="d-flex align-items-center gap-2">
+                <span class="bg-primary rounded-1" style="width: 16px; height: 16px;"></span>
+                <span class="text-secondary small">Ship</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="bg-danger rounded-1" style="width: 16px; height: 16px;"></span>
+                <span class="text-secondary small">Sunk</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="bg-warning rounded-circle" style="width: 12px; height: 12px;"></span>
+                <span class="text-secondary small">Shot</span>
+            </div>
         </div>
     </div>
-</div>
+}
 
 <style>
     .board {

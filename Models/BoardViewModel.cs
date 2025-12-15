@@ -7,4 +7,6 @@ public class BoardViewModel
     public required List<ShipViewModel> OpponentSunkShips { get; set; }
     public required List<Shot> MyShots { get; set; }
     public required List<Shot> OpponentShots { get; set; }
+
+    public string? SelectedShotPosition { get; set; }
 }
