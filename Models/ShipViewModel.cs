@@ -1,3 +1,5 @@
+using Battleship.Controllers;
+
 namespace Battleship.Models;
 
 public class ShipViewModel

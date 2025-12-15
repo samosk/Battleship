@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Mvc;
+using Battleship.Models;
+
 namespace Battleship.Controllers;
 
 public class GameController : Controller
