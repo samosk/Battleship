@@ -17,7 +17,7 @@ builder.Services.AddDbContext<BattleshipContext>(options => options.UseNpgsql(
         .MapEnum<ShotOutcome>("shot_outcome")));
 builder.Services.AddDbContext<BattleshipIdentityContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Battleship")));
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<BattleshipIdentityContext>();
 
 var app = builder.Build();
