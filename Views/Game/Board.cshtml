@@ -9,21 +9,24 @@
 
 @if (Model != null)
 {
-    <div class="min-vh-100 bg-light py-5 px-3">
+    <div class="min-vh-100 py-5 px-3">
         <h1 class="text-center text-dark fw-light text-uppercase fs-4 mb-5" style="letter-spacing: 0.1em;">
-            @(Model.Game.ActiveUserId == 1 ? "Your Turn" : "Opponent's Turn") <!-- TODO: Replace with actual user ID -->
+            @(Model.Game.ActiveUserId == Model.Game.User1Id ? "Player one's Turn" : "Player two's Turn")
+            <!-- TODO: Replace with actual user ID -->
         </h1>
 
         <div class="d-flex flex-wrap justify-content-center gap-5">
             <!-- My Fleet -->
             <div class="text-center">
                 <h2 class="text-secondary text-uppercase fs-6 fw-normal mb-3" style="letter-spacing: 0.08em;">My Fleet</h2>
-                <div class="bg-white border rounded-1 p-0 position-relative" style="width: 320px; height: 320px;">
+                <div class="border rounded-1 p-0 position-relative" style="width: 320px; height: 320px;">
                     <div class="board position-relative w-100 h-100">
                         @foreach (var ship in Model.MyShips)
                         {
                             var bgClass = ship.IsSunk ? "bg-danger" : "bg-primary";
-                            <div class="@bgClass rounded-1 position-relative" style="grid-column: @(ship.StartColumn) / @(ship.EndColumn); grid-row: @(ship.StartRow) / @(ship.EndRow); margin: 2px;"></div>
+                            <div class="@bgClass rounded-1 position-relative"
+                                style="grid-column: @(ship.StartColumn) / @(ship.EndColumn); grid-row: @(ship.StartRow) / @(ship.EndRow); margin: 2px;">
+                            </div>
                         }
 
                         @foreach (var shot in Model.OpponentShots)
@@ -31,12 +34,23 @@
                             var position = new Position { X = shot.X, Y = shot.Y };
 
                             var shotHitsSunkShip = Model.MyShips
-                                .Where(s => s.IsSunk)
-                                .Any(ship => GameController.IsPositionInShip(position, ship));
+                            .Where(s => s.IsSunk)
+                            .Any(ship => GameController.IsPositionInShip(position, ship));
 
-                            if (!shotHitsSunkShip)
+                            var shotHitsShip = Model.MyShips.Where(s => s.IsSunk != true)
+                            .Any(ship => GameController.IsPositionInShip(position, ship));
+
+                            if (!shotHitsSunkShip && shotHitsShip)
                             {
-                                <div class="bg-warning rounded-circle position-relative" style="grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1); width: 50%; height: 50%; margin: auto;"></div>
+                                <div class="bg-warning position-relative"
+                                    style="grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1); width: 50%; height: 50%; margin: auto;">
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="bg-warning rounded-circle position-realtive"
+                                    style="grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1); width: 50%; height: 50%; margin: auto;">
+                                </div>
                             }
                         }
                     </div>
@@ -45,35 +59,50 @@
 
             <!-- Enemy Fleet -->
             <div class="text-center">
-                <h2 class="text-secondary text-uppercase fs-6 fw-normal mb-3" style="letter-spacing: 0.08em;">Enemy Fleet</h2>
-                <div class="bg-white border rounded-1 p-0 position-relative" style="width: 320px; height: 320px;">
+                <h2 class="text-secondary text-uppercase fs-6 fw-normal mb-3" style="letter-spacing: 0.08em;">Enemy Fleet
+                </h2>
+                <div class="border rounded-1 p-0 position-relative" style="width: 320px; height: 320px;">
                     <form method="post" action="/Game/Shoot/@Model.Game.GameId" class="board position-relative w-100 h-100">
                         @foreach (var sunkShip in Model.OpponentSunkShips)
-                            {
-                            <div class="bg-danger rounded-1 position-relative" style="grid-column: @(sunkShip.StartColumn) / @(sunkShip.EndColumn); grid-row: @(sunkShip.StartRow) / @(sunkShip.EndRow); margin: 2px;"></div>
-                            }
+                        {
+                            <div class="bg-danger rounded-1 position-relative"
+                                style="grid-column: @(sunkShip.StartColumn) / @(sunkShip.EndColumn); grid-row: @(sunkShip.StartRow) / @(sunkShip.EndRow); margin: 2px;">
+                            </div>
+                        }
 
                         @foreach (var shot in Model.MyShots)
+                        {
+                            var position = new Position { X = shot.X, Y = shot.Y };
+
+                            var shotHitsSunkShip = Model.MyShips
+                            .Where(s => s.IsSunk)
+                            .Any(ship => GameController.IsPositionInShip(position, ship));
+
+                            var shotHitsShip = Model.MyShips.Where(s => s.IsSunk != true)
+                            .Any(ship => GameController.IsPositionInShip(position, ship));
+
+                            if (!shotHitsSunkShip && shotHitsShip)
                             {
-                                var position = new Position { X = shot.X, Y = shot.Y };
-
-                                var shotHitsSunkShip = Model.MyShips
-                                    .Where(s => s.IsSunk)
-                                    .Any(ship => GameController.IsPositionInShip(position, ship));
-
-                                if (!shotHitsSunkShip)
-                                {
-                                <div class="bg-warning rounded-circle position-relative" style="grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1); width: 50%; height: 50%; margin: auto;"></div>
-                                }
+                                <div class="bg-warning position-relative"
+                                    style="grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1); width: 50%; height: 50%; margin: auto;">
+                                </div>
                             }
+                            else
+                            {
+                                <div class="bg-warning rounded-circle position-realtive"
+                                    style="grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1); width: 50%; height: 50%; margin: auto;">
+                                </div>
+                            }
+                        }
 
                         @for (int y = 1; y <= 10; y++)
+                        {
+                            @for (int x = 1; x <= 10; x++)
                             {
-                                @for (int x = 1; x <= 10; x++)
-                                {
-                                <input type="radio" name="SelectedShotPosition" value="@x,@y" class="z-1 opacity-25" style="grid-column: @x / @(x + 1); grid-row: @y / @(y + 1);" />
-                                }
+                                <input type="radio" name="SelectedShotPosition" value="@x,@y" class="z-1 opacity-25"
+                                    style="grid-column: @x / @(x + 1); grid-row: @y / @(y + 1);" />
                             }
+                        }
 
                         <button type="submit" class="position-absolute top-100 start-50 translate-middle-x">Shoot</button>
                     </form>
