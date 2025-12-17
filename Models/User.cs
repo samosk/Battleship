@@ -1,13 +1,9 @@
-﻿namespace Battleship.Models;
+﻿using Microsoft.AspNetCore.Identity;
 
-public partial class User
+namespace Battleship.Models;
+
+public partial class User : IdentityUser
 {
-    public int UserId { get; set; }
-
-    public string Username { get; set; } = null!;
-
-    public string? PasswordHash { get; set; }
-
     public virtual ICollection<Game> GameActiveUsers { get; set; } = new List<Game>();
 
     public virtual ICollection<Game> GameUser1s { get; set; } = new List<Game>();

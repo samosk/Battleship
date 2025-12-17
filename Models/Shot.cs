@@ -6,7 +6,7 @@ public partial class Shot
 
     public int GameId { get; set; }
 
-    public int ShooterUserId { get; set; }
+    public string ShooterUserId { get; set; } = null!;
 
     public int X { get; set; }
 

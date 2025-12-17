@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Battleship.Models;
 
@@ -6,11 +7,13 @@ namespace Battleship.Controllers;
 public class GameController : Controller
 {
     private readonly BattleshipContext _context;
+    private readonly UserManager<User> _userManager;
     private readonly ILogger<GameController> _logger;
 
-    public GameController(BattleshipContext context, ILogger<GameController> logger)
+    public GameController(BattleshipContext context, UserManager<User> userManager, ILogger<GameController> logger)
     {
         _context = context;
+        _userManager = userManager;
         _logger = logger;
     }
 
@@ -24,17 +27,19 @@ public class GameController : Controller
     {
         var game = _context.Games.Find(id);
         if (game == null) return NotFound();
+        
+        var userId = _userManager.GetUserId(HttpContext.User);
 
         var myShots = _context.Shots
-            .Where(s => s.GameId == id && s.ShooterUserId == 1) // TODO: Replace with actual user ID
+            .Where(s => s.GameId == id && s.ShooterUserId == userId)
             .ToList();
 
         var opponentShots = _context.Shots
-            .Where(s => s.GameId == id && s.ShooterUserId == 2) // TODO: Replace with actual user ID
+            .Where(s => s.GameId == id && s.ShooterUserId != userId)
             .ToList();
 
         var myShipViewModels = _context.Ships
-            .Where(s => s.GameId == id && s.UserId == 1) // TODO: Replace with actual user ID
+            .Where(s => s.GameId == id && s.UserId == userId)
             .Select(s => new ShipViewModel()
             {
                 X = s.X,
@@ -47,7 +52,7 @@ public class GameController : Controller
             .ToList();
 
         var opponentSunkShips = _context.Ships
-            .Where(s => s.GameId == id && s.UserId == 2) // TODO: Replace with actual user ID
+            .Where(s => s.GameId == id && s.UserId != userId)
             .Select(s => new ShipViewModel()
             {
                 X = s.X,
@@ -64,7 +69,7 @@ public class GameController : Controller
         {
             Game = game,
             MyShips = myShipViewModels,
-            OpponentSunkShips = opponentSunkShips,// TODO: Populate opponent's sunk ships
+            OpponentSunkShips = opponentSunkShips,
             MyShots = myShots,
             OpponentShots = opponentShots
         };
@@ -82,7 +87,9 @@ public class GameController : Controller
         if (game == null) return NotFound();
         if (vm.SelectedShotPosition == null) return BadRequest();
 
-        if (game.ActiveUserId != 1) // TODO: Replace with actual user ID
+        var userId = _userManager.GetUserId(HttpContext.User);
+
+        if (game.ActiveUserId != userId)
         {
             return BadRequest("It's not your turn.");
         }
@@ -102,7 +109,7 @@ public class GameController : Controller
         }
 
         var myShots = _context.Shots
-            .Where(s => s.GameId == id && s.ShooterUserId == 1) // TODO: Replace with actual user ID
+            .Where(s => s.GameId == id && s.ShooterUserId == userId)
             .ToList();
 
         if (myShots.Any(s => s.X == x && s.Y == y))
@@ -113,7 +120,7 @@ public class GameController : Controller
         var shot = new Shot
         {
             GameId = id,
-            ShooterUserId = 1, // TODO: Replace with actual user ID
+            ShooterUserId = userId,
             X = x,
             Y = y
         };
@@ -121,7 +128,7 @@ public class GameController : Controller
         var position = new Position { X = x, Y = y };
 
         var opponentShips = _context.Ships
-            .Where(s => s.GameId == id && s.UserId != 1) // TODO: Replace with actual user ID
+            .Where(s => s.GameId == id && s.UserId != userId)
             .ToList();
 
         if (opponentShips.Any(ship => IsPositionInShip(position, ship)))

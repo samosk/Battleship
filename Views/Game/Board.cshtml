@@ -1,5 +1,8 @@
 @using Battleship.Models;
 @using Battleship.Controllers;
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> UserManager
+
 
 @model Battleship.Models.BoardViewModel
 
@@ -11,7 +14,7 @@
 {
     <div class="min-vh-100 py-5 px-3">
         <h1 class="text-center text-dark fw-light text-uppercase fs-4 mb-5" style="letter-spacing: 0.1em;">
-            @(Model.Game.ActiveUserId == Model.Game.User1Id ? "Player one's Turn" : "Player two's Turn")
+            @(Model.Game.ActiveUserId.ToString() == @UserManager.GetUserId(User) ? "My Turn" : "Opponent's Turn")
             <!-- TODO: Replace with actual user ID -->
         </h1>
 

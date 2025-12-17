@@ -125,13 +125,11 @@ public partial class BattleshipContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("user_pk");
+            entity.HasKey(e => e.Id).HasName("user_pk");
 
             entity.ToTable("user");
 
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-            entity.Property(e => e.PasswordHash).HasColumnName("password_hash");
-            entity.Property(e => e.Username).HasColumnName("username");
+            // entity.Property(e => e.Id).HasColumnName("user_id");
         });
 
         OnModelCreatingPartial(modelBuilder);

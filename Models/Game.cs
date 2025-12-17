@@ -6,11 +6,11 @@ public partial class Game
 
     public string? Name { get; set; }
 
-    public int User1Id { get; set; }
+    public string User1Id { get; set; } = null!;
 
-    public int User2Id { get; set; }
+    public string User2Id { get; set; } = null!;
 
-    public int ActiveUserId { get; set; }
+    public string ActiveUserId { get; set; } = null!;
 
     public int TurnCount { get; set; }
 

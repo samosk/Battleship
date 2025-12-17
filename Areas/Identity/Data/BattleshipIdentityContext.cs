@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Battleship.Models;
 
 namespace Battleship.Areas.Identity.Data;
 
-public class BattleshipIdentityContext : IdentityDbContext<IdentityUser>
+public class BattleshipIdentityContext : IdentityDbContext<User>
 {
     public BattleshipIdentityContext(DbContextOptions<BattleshipIdentityContext> options)
         : base(options)
