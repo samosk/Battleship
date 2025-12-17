@@ -1,7 +1,6 @@
 using Battleship;
 using Battleship.Models;
 using Microsoft.EntityFrameworkCore;
-using Battleship.Areas.Identity.Data;
 using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,10 +14,8 @@ builder.Services.AddDbContext<BattleshipContext>(options => options.UseNpgsql(
         .MapEnum<ShipType>("ship_type")
         .MapEnum<ShipOrientation>("ship_orientation")
         .MapEnum<ShotOutcome>("shot_outcome")));
-builder.Services.AddDbContext<BattleshipIdentityContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Battleship")));
 builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddEntityFrameworkStores<BattleshipIdentityContext>();
+    .AddEntityFrameworkStores<BattleshipContext>();
 
 var app = builder.Build();
 

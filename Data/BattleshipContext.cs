@@ -1,9 +1,10 @@
 ﻿using Battleship.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Battleship;
 
-public partial class BattleshipContext : DbContext
+public partial class BattleshipContext : IdentityDbContext<User>
 {
     public BattleshipContext()
     { }
@@ -13,18 +14,14 @@ public partial class BattleshipContext : DbContext
     { }
 
     public virtual DbSet<Game> Games { get; set; }
-
     public virtual DbSet<Ship> Ships { get; set; }
-
     public virtual DbSet<Shot> Shots { get; set; }
-
-    public virtual DbSet<User> Users { get; set; }
-
-    // OnConfiguring is intentionally removed. DbContext should be configured via
-    // DI in Program.cs with UseNpgsql and the required enum mappings.
+    // Note: Users DbSet is inherited from IdentityDbContext<User>
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder); // Configures Identity tables
+
         modelBuilder
             .HasPostgresEnum<GameState>("game_state")
             .HasPostgresEnum<ShipOrientation>("ship_orientation")
@@ -125,11 +122,8 @@ public partial class BattleshipContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("user_pk");
-
             entity.ToTable("user");
-
-            // entity.Property(e => e.Id).HasColumnName("user_id");
+            // Identity configures the key, so we only need the table name
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -1,4 +1,5 @@
 ﻿using System;
+using Battleship.Models;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -7,11 +8,21 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Battleship.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class CustomUserIdentity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:Enum:game_state", "END,PLAY,SETUP")
+                .Annotation("Npgsql:Enum:game_state.game_state", "SETUP,PLAY,END")
+                .Annotation("Npgsql:Enum:ship_orientation", "HORIZONTAL,VERTICAL")
+                .Annotation("Npgsql:Enum:ship_orientation.ship_orientation", "HORIZONTAL,VERTICAL")
+                .Annotation("Npgsql:Enum:ship_type", "BATTLESHIP,CARRIER,DESTROYER,PATROL_BOAT,SUBMARINE")
+                .Annotation("Npgsql:Enum:ship_type.ship_type", "CARRIER,BATTLESHIP,DESTROYER,SUBMARINE,PATROL_BOAT")
+                .Annotation("Npgsql:Enum:shot_outcome", "HIT,MISS,SINK")
+                .Annotation("Npgsql:Enum:shot_outcome.shot_outcome", "HIT,MISS,SINK");
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -27,7 +38,7 @@ namespace Battleship.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUsers",
+                name: "user",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
@@ -48,7 +59,7 @@ namespace Battleship.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.PrimaryKey("PK_user", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -86,9 +97,9 @@ namespace Battleship.Migrations
                 {
                     table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AspNetUserClaims_AspNetUsers_UserId",
+                        name: "FK_AspNetUserClaims_user_UserId",
                         column: x => x.UserId,
-                        principalTable: "AspNetUsers",
+                        principalTable: "user",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -106,9 +117,9 @@ namespace Battleship.Migrations
                 {
                     table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
                     table.ForeignKey(
-                        name: "FK_AspNetUserLogins_AspNetUsers_UserId",
+                        name: "FK_AspNetUserLogins_user_UserId",
                         column: x => x.UserId,
-                        principalTable: "AspNetUsers",
+                        principalTable: "user",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -130,9 +141,9 @@ namespace Battleship.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_AspNetUserRoles_AspNetUsers_UserId",
+                        name: "FK_AspNetUserRoles_user_UserId",
                         column: x => x.UserId,
-                        principalTable: "AspNetUsers",
+                        principalTable: "user",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -150,11 +161,104 @@ namespace Battleship.Migrations
                 {
                     table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
                     table.ForeignKey(
-                        name: "FK_AspNetUserTokens_AspNetUsers_UserId",
+                        name: "FK_AspNetUserTokens_user_UserId",
                         column: x => x.UserId,
-                        principalTable: "AspNetUsers",
+                        principalTable: "user",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "game",
+                columns: table => new
+                {
+                    game_id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    name = table.Column<string>(type: "text", nullable: true),
+                    user1_id = table.Column<string>(type: "text", nullable: false),
+                    user2_id = table.Column<string>(type: "text", nullable: false),
+                    active_user_id = table.Column<string>(type: "text", nullable: false),
+                    turn_count = table.Column<int>(type: "integer", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "now()"),
+                    modified_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "now()"),
+                    state = table.Column<GameState>(type: "game_state", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("game_pk", x => x.game_id);
+                    table.ForeignKey(
+                        name: "game_active_user_id_fkey",
+                        column: x => x.active_user_id,
+                        principalTable: "user",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "game_user1_id_fkey",
+                        column: x => x.user1_id,
+                        principalTable: "user",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "game_user2_id_fkey",
+                        column: x => x.user2_id,
+                        principalTable: "user",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ship",
+                columns: table => new
+                {
+                    ship_id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    game_id = table.Column<int>(type: "integer", nullable: false),
+                    user_id = table.Column<string>(type: "text", nullable: false),
+                    x = table.Column<int>(type: "integer", nullable: false),
+                    y = table.Column<int>(type: "integer", nullable: false),
+                    orientation = table.Column<ShipOrientation>(type: "ship_orientation", nullable: false),
+                    type = table.Column<ShipType>(type: "ship_type", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("ship_pkey", x => x.ship_id);
+                    table.ForeignKey(
+                        name: "ship_game_id_fkey",
+                        column: x => x.game_id,
+                        principalTable: "game",
+                        principalColumn: "game_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "ship_user_id_fkey",
+                        column: x => x.user_id,
+                        principalTable: "user",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "shot",
+                columns: table => new
+                {
+                    shot_id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    game_id = table.Column<int>(type: "integer", nullable: false),
+                    shooter_user_id = table.Column<string>(type: "text", nullable: false),
+                    x = table.Column<int>(type: "integer", nullable: false),
+                    y = table.Column<int>(type: "integer", nullable: false),
+                    outcome = table.Column<ShotOutcome>(type: "shot_outcome", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("shot_pkey", x => x.shot_id);
+                    table.ForeignKey(
+                        name: "shot_game_id_fkey",
+                        column: x => x.game_id,
+                        principalTable: "game",
+                        principalColumn: "game_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "shot_shooter_user_id_fkey",
+                        column: x => x.shooter_user_id,
+                        principalTable: "user",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -184,13 +288,48 @@ namespace Battleship.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_game_active_user_id",
+                table: "game",
+                column: "active_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_game_user1_id",
+                table: "game",
+                column: "user1_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_game_user2_id",
+                table: "game",
+                column: "user2_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ship_game_id",
+                table: "ship",
+                column: "game_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ship_user_id",
+                table: "ship",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_shot_game_id",
+                table: "shot",
+                column: "game_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_shot_shooter_user_id",
+                table: "shot",
+                column: "shooter_user_id");
+
+            migrationBuilder.CreateIndex(
                 name: "EmailIndex",
-                table: "AspNetUsers",
+                table: "user",
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
-                table: "AspNetUsers",
+                table: "user",
                 column: "NormalizedUserName",
                 unique: true);
         }
@@ -214,10 +353,19 @@ namespace Battleship.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "ship");
+
+            migrationBuilder.DropTable(
+                name: "shot");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "game");
+
+            migrationBuilder.DropTable(
+                name: "user");
         }
     }
 }
