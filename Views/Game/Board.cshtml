@@ -37,24 +37,16 @@
                             var position = new Position { X = shot.X, Y = shot.Y };
 
                             var shotHitsSunkShip = Model.MyShips
-                            .Where(s => s.IsSunk)
-                            .Any(ship => GameController.IsPositionInShip(position, ship));
+                                .Where(s => s.IsSunk)
+                                .Any(ship => GameController.IsPositionInShip(position, ship));
 
-                            var shotHitsShip = Model.MyShips.Where(s => s.IsSunk != true)
-                            .Any(ship => GameController.IsPositionInShip(position, ship));
+                            var shipClass = shotHitsSunkShip ? "bg-transparent"
+                                : (shot.Outcome == ShotOutcome.HIT) ? "bg-warning"
+                                : "bg-warning rounded-circle";
 
-                            if (!shotHitsSunkShip && shotHitsShip)
-                            {
-                                <div class="bg-warning position-relative"
-                                    style="grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1); width: 50%; height: 50%; margin: auto;">
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="bg-warning rounded-circle position-realtive"
-                                    style="grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1); width: 50%; height: 50%; margin: auto;">
-                                </div>
-                            }
+                            <div class="position-relative @shipClass"
+                                style="grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1); width: 50%; height: 50%; margin: auto;">
+                            </div>
                         }
                     </div>
                 </div>
@@ -77,25 +69,16 @@
                         {
                             var position = new Position { X = shot.X, Y = shot.Y };
 
-                            var shotHitsSunkShip = Model.MyShips
-                            .Where(s => s.IsSunk)
-                            .Any(ship => GameController.IsPositionInShip(position, ship));
+                            var shotHitsSunkShip = Model.OpponentSunkShips
+                                .Any(ship => GameController.IsPositionInShip(position, ship));
+                            
+                            var shipClass = shotHitsSunkShip ? "bg-transparent"
+                                : (shot.Outcome == ShotOutcome.HIT) ? "bg-warning"
+                                : "bg-warning rounded-circle";
 
-                            var shotHitsShip = Model.MyShips.Where(s => s.IsSunk != true)
-                            .Any(ship => GameController.IsPositionInShip(position, ship));
-
-                            if (!shotHitsSunkShip && shotHitsShip)
-                            {
-                                <div class="bg-warning position-relative"
-                                    style="grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1); width: 50%; height: 50%; margin: auto;">
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="bg-warning rounded-circle position-realtive"
-                                    style="grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1); width: 50%; height: 50%; margin: auto;">
-                                </div>
-                            }
+                            <div class="position-relative @shipClass"
+                                style="grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1); width: 50%; height: 50%; margin: auto;">
+                            </div>
                         }
 
                         @for (int y = 1; y <= 10; y++)

@@ -38,7 +38,7 @@ public class GameController : Controller
             .Where(s => s.GameId == id && s.ShooterUserId != userId)
             .ToList();
 
-        var myShipViewModels = _context.Ships
+        var myShips = _context.Ships
             .Where(s => s.GameId == id && s.UserId == userId)
             .Select(s => new ShipViewModel()
             {
@@ -51,7 +51,7 @@ public class GameController : Controller
             })
             .ToList();
 
-        var opponentSunkShips = _context.Ships
+        var opponentShips = _context.Ships
             .Where(s => s.GameId == id && s.UserId != userId)
             .Select(s => new ShipViewModel()
             {
@@ -60,15 +60,18 @@ public class GameController : Controller
                 Orientation = s.Orientation,
                 Type = s.Type,
                 IsMine = false,
-                IsSunk = true
+                IsSunk = IsShipSunk(s, myShots)
             })
             .ToList();
 
+        var opponentSunkShips = opponentShips
+            .Where(s => s.IsSunk)
+            .ToList();
 
         var viewModel = new BoardViewModel
         {
             Game = game,
-            MyShips = myShipViewModels,
+            MyShips = myShips,
             OpponentSunkShips = opponentSunkShips,
             MyShots = myShots,
             OpponentShots = opponentShots
@@ -122,7 +125,8 @@ public class GameController : Controller
             GameId = id,
             ShooterUserId = userId,
             X = x,
-            Y = y
+            Y = y,
+            Outcome = ShotOutcome.MISS // Default, may change below
         };
 
         var position = new Position { X = x, Y = y };
@@ -131,17 +135,20 @@ public class GameController : Controller
             .Where(s => s.GameId == id && s.UserId != userId)
             .ToList();
 
-        if (opponentShips.Any(ship => IsPositionInShip(position, ship)))
+        opponentShips.ForEach(ship =>
         {
-            shot.Outcome = ShotOutcome.HIT;
-            if (opponentShips.Any(ship => IsShipSunk(ship, myShots.Append(shot).ToList())))
+            if (IsPositionInShip(position, ship))
             {
-                shot.Outcome = ShotOutcome.SINK;
+                shot.Outcome = ShotOutcome.HIT;
+                if (IsShipSunk(ship, myShots.Append(shot).ToList()))
+                {
+                    shot.Outcome = ShotOutcome.SINK;
+                }
             }
-        }
-        else
+        });
+        
+        if (shot.Outcome == ShotOutcome.MISS)
         {
-            shot.Outcome = ShotOutcome.MISS;
             if (game.ActiveUserId == game.User1Id)
             {
                 game.ActiveUserId = game.User2Id;
@@ -204,9 +211,9 @@ public class GameController : Controller
         var length = GetShipLength(ship);
 
         var xStart = ship.X;
-        var xEnd = ship.Orientation == ShipOrientation.HORIZONTAL ? xStart + length : xStart + 1;
+        var xEnd = ship.Orientation == ShipOrientation.HORIZONTAL ? xStart + length - 1 : xStart;
         var yStart = ship.Y;
-        var yEnd = ship.Orientation == ShipOrientation.VERTICAL ? yStart + length : yStart + 1;
+        var yEnd = ship.Orientation == ShipOrientation.VERTICAL ? yStart + length - 1 : yStart;
 
         return (position.X >= xStart) && (position.X <= xEnd) && (position.Y >= yStart) && (position.Y <= yEnd);
     }
@@ -216,10 +223,10 @@ public class GameController : Controller
         return IsPositionInShip(position, new Ship(vm));
     }
 
-    public static bool IsShipSunk(Ship ship, List<Shot> shots)
+    public static bool IsShipSunk(Ship ship, List<Shot> candidateShots)
     {
         return GetPositionsForShip(ship).All(p =>
-            shots.Any(s => s.X == p.X && s.Y == p.Y)
+            candidateShots.Any(s => s.X == p.X && s.Y == p.Y)
         );
     }
 }
