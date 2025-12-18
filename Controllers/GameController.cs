@@ -90,6 +90,11 @@ public class GameController : Controller
         if (game == null) return NotFound();
         if (vm.SelectedShotPosition == null) return BadRequest();
 
+        if (game.State != GameState.PLAY)
+        {
+            return BadRequest("Shooting is not allowed right now.");
+        }
+
         var userId = _userManager.GetUserId(HttpContext.User);
 
         if (game.ActiveUserId != userId)
@@ -131,6 +136,8 @@ public class GameController : Controller
 
         var position = new Position { X = x, Y = y };
 
+        var myShotsNew = myShots.Append(shot).ToList();
+
         var opponentShips = _context.Ships
             .Where(s => s.GameId == id && s.UserId != userId)
             .ToList();
@@ -140,14 +147,21 @@ public class GameController : Controller
             if (IsPositionInShip(position, ship))
             {
                 shot.Outcome = ShotOutcome.HIT;
-                if (IsShipSunk(ship, myShots.Append(shot).ToList()))
+                if (IsShipSunk(ship, myShotsNew))
                 {
                     shot.Outcome = ShotOutcome.SINK;
                 }
             }
         });
-        
-        if (shot.Outcome == ShotOutcome.MISS)
+
+        var sinkCount = myShotsNew
+            .FindAll(shot => shot.Outcome == ShotOutcome.SINK)
+            .Count();
+        if (sinkCount == opponentShips.Count())
+        {
+            game.State = GameState.END;
+        }
+        else if (shot.Outcome == ShotOutcome.MISS)
         {
             if (game.ActiveUserId == game.User1Id)
             {

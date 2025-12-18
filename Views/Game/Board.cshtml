@@ -8,14 +8,22 @@
 
 @{
     ViewData["Title"] = "Game Board";
+
+    var isMyTurn = Model.Game.ActiveUserId == @UserManager.GetUserId(User);
 }
 
 @if (Model != null)
 {
     <div class="min-vh-100 py-5 px-3">
         <h1 class="text-center text-dark fw-light text-uppercase fs-4 mb-5" style="letter-spacing: 0.1em;">
-            @(Model.Game.ActiveUserId.ToString() == @UserManager.GetUserId(User) ? "My Turn" : "Opponent's Turn")
-            <!-- TODO: Replace with actual user ID -->
+            @if (Model.Game.State == GameState.END)
+            {
+                @(isMyTurn ? "You Won!" : "You Lost!")
+            }
+            else
+            {
+                @(isMyTurn ? "Your Turn" : "Opponent's Turn")
+            }
         </h1>
 
         <div class="d-flex flex-wrap justify-content-center gap-5">
@@ -27,6 +35,7 @@
                         @foreach (var ship in Model.MyShips)
                         {
                             var bgClass = ship.IsSunk ? "bg-danger" : "bg-primary";
+
                             <div class="@bgClass rounded-1 position-relative"
                                 style="grid-column: @(ship.StartColumn) / @(ship.EndColumn); grid-row: @(ship.StartRow) / @(ship.EndRow); margin: 2px;">
                             </div>
@@ -81,16 +90,20 @@
                             </div>
                         }
 
-                        @for (int y = 1; y <= 10; y++)
+                        @if (Model.Game.State == GameState.PLAY && isMyTurn)
                         {
-                            @for (int x = 1; x <= 10; x++)
+                            @for (int y = 1; y <= 10; y++)
                             {
-                                <input type="radio" name="SelectedShotPosition" value="@x,@y" class="z-1 opacity-25"
-                                    style="grid-column: @x / @(x + 1); grid-row: @y / @(y + 1);" />
+                                @for (int x = 1; x <= 10; x++)
+                                {
+                                    <input type="radio" name="SelectedShotPosition" value="@x,@y" class="z-1 opacity-25"
+                                        style="grid-column: @x / @(x + 1); grid-row: @y / @(y + 1);" />
+                                }
                             }
                         }
 
-                        <button type="submit" class="position-absolute top-100 start-50 translate-middle-x">Shoot</button>
+                        <button type="submit" class="position-absolute top-100 start-50 translate-middle-x"
+                            disabled=@(Model.Game.State != GameState.PLAY || !isMyTurn)>Shoot</button>
                     </form>
                 </div>
             </div>
