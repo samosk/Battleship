@@ -1,56 +1,211 @@
 @using Microsoft.AspNetCore.Identity
 @using Battleship.Models;
-
 @inject UserManager<User> UserManager
-
 @model Battleship.Models.SetupViewModel
-
 @{
     ViewData["Title"] = "Game Setup";
 }
 
 <div class="min-vh-100 py-5 px-3">
-    <h1>Place Your Ships</h1>
-    <form method="post">
-        @for (int i = 0; i < Model.Ships.Count; i++)
-        {
-                <h2>@Model.Ships[i].Type.GetDisplayName()</h2>
-                
-            <div class="position-group form-group">
-                <label asp-for="Ships[i].X">X</label>
-                <input asp-for="Ships[i].X" min="1" max="10" />
-            </div>
+    <h1 class="text-center text-dark fw-light text-uppercase fs-4 mb-5" style="letter-spacing: 0.1em;">Place Your Ships
+    </h1>
 
-            <div class="position-group form-group">
-                <label asp-for="Ships[i].Y">Y</label>
-                <input asp-for="Ships[i].Y" min="1" max="10" />
-            </div>
-
-                <!-- @foreach( var c in System.Enum.GetValues(typeof(ShipOrientation)))
+    <div class="d-flex gap-5">
+        <!-- Ship Form Inputs (Left hand side) -->
+        <form method="post" class="d-flex flex-column align-items-center">
+            <div class="d-flex flex-wrap justify-content-center gap-4">
+                @for (int i = 0; i < Model.Ships.Count; i++)
                 {
-                    <input type="radio" asp-for="Ships[i].Orientation" value="@((int)c)" />
-                    <label asp-for="Ships[i].Orientation">@c</label>
-                } -->
-            
-            <div class="position-group form-group">
-                <label asp-for="Ships[i].Orientation">
-                    <input asp-for="Ships[i].Orientation" type="radio" value="HORIZONTAL" />
-                    Horizontal
-                </label>
+                    var shipLength = Model.Ships[i].Type switch
+                    {
+                        ShipType.CARRIER => 5,
+                        ShipType.BATTLESHIP => 4,
+                        ShipType.DESTROYER => 3,
+                        ShipType.SUBMARINE => 3,
+                        ShipType.PATROL_BOAT => 2,
+                        _ => 0
+                        };
+                    <div class="bg-light border rounded-1 p-4" style="width: 240px;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="text-secondary text-uppercase fs-6 fw-normal m-0" style="letter-spacing: 0.08em;">
+                                @Model.Ships[i].Type.GetDisplayName()</h2>
+                            <span class="text-secondary small">@shipLength cells</span>
+                        </div>
+
+                        <div class="d-flex gap-3 mb-3">
+                            <div class="flex-fill">
+                                <label asp-for="Ships[i].X" class="text-secondary small d-block mb-1">X</label>
+                                <div class="input-group input-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary"
+                                        onclick="stepValue(this, -1)">−</button>
+                                    <input asp-for="Ships[i].X" type="text" placeholder="-" tabindex="-1" readonly
+                                        class="form-control form-control-sm border ship-input text-center pe-none user-select-none"
+                                        data-ship-index="@i" data-ship-length="@shipLength"
+                                        data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="x" />
+                                    <button type="button" class="btn btn-outline-secondary"
+                                        onclick="stepValue(this, 1)">+</button>
+                                </div>
+                            </div>
+                            <div class="flex-fill">
+                                <label asp-for="Ships[i].Y" class="text-secondary small d-block mb-1">Y</label>
+                                <div class="input-group input-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary"
+                                        onclick="stepValue(this, -1)">−</button>
+                                    <input asp-for="Ships[i].Y" type="text" placeholder="-" tabindex="-1" readonly
+                                        class="form-control form-control-sm border ship-input text-center pe-none user-select-none"
+                                        data-ship-index="@i" data-ship-length="@shipLength"
+                                        data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="y" />
+                                    <button type="button" class="btn btn-outline-secondary"
+                                        onclick="stepValue(this, 1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="text-secondary small d-block mb-2">Orientation</span>
+                            <div class="d-flex gap-3">
+                                <label class="d-flex align-items-center gap-2 text-secondary small">
+                                    <input asp-for="Ships[i].Orientation" type="radio" value="HORIZONTAL"
+                                        class="form-check-input m-0 ship-input" data-ship-index="@i"
+                                        data-ship-length="@shipLength"
+                                        data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="orientation"
+                                        checked />
+                                    Horizontal
+                                </label>
+                                <label class="d-flex align-items-center gap-2 text-secondary small">
+                                    <input asp-for="Ships[i].Orientation" type="radio" value="VERTICAL"
+                                        class="form-check-input m-0 ship-input" data-ship-index="@i"
+                                        data-ship-length="@shipLength"
+                                        data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="orientation" />
+                                    Vertical
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                }
             </div>
 
-            <div class="position-group form-group">
-                <label asp-for="Ships[i].Orientation">
-                    <input asp-for="Ships[i].Orientation" type="radio" value="VERTICAL" />
-                    Vertical
-                </label>
+            <button type="submit" class="btn btn-dark px-5 py-2 mt-5 text-uppercase small fw-normal"
+                style="letter-spacing: 0.08em;">Ready</button>
+        </form>
+
+        <!-- Preview Board (Right hand side) -->
+        <div class="text-center position-sticky" style="top: 2rem;">
+            <h2 class="text-secondary text-uppercase fs-6 fw-normal mb-3" style="letter-spacing: 0.08em;">Preview</h2>
+            <div class="bg-light border rounded-1 position-relative" style="width: 320px; height: 320px;">
+                <div id="preview-board" class="position-relative w-100 h-100">
+                    <!-- Grid lines -->
+                    @for (int row = 0; row < 10; row++)
+                    {
+                        @for (int col = 0; col < 10; col++)
+                        {
+                            <div class="position-absolute border-end border-bottom"
+                                style="width: 10%; height: 10%; left: @(col * 10)%; top: @(row * 10)%;"></div>
+                        }
+                    }
+                    <!-- Ships will be rendered here by JavaScript -->
+                </div>
             </div>
-        }
-        <button type="submit">Ready</button>
-        @* <div class="form-group mb-3">
-            <label asp-for="X" class="control-label fw-bold">X</label>
-            <input asp-for="X" class="form-control" required type="number" min="0" step="0.01" />
-            <span asp-validation-for="X" class="text-danger"></span>
-        </div> *@
-    </form>
+
+            <!-- Legend -->
+            <div class="d-flex justify-content-center gap-4 mt-4">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="bg-primary rounded-1" style="width: 16px; height: 16px;"></span>
+                    <span class="text-secondary small">Ship</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="bg-danger rounded-1" style="width: 16px; height: 16px;"></span>
+                    <span class="text-secondary small">Invalid</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+    function stepValue(button, delta) {
+        const input = button.parentElement.querySelector('input');
+        let val = parseInt(input.value) || 0;
+        val += delta;
+        val = Math.max(1, Math.min(10, val));
+        input.value = val;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const board = document.getElementById('preview-board');
+        const ships = [...document.querySelectorAll('[data-ship-index][data-field="x"]')].map(el => ({
+            x: 1,
+            y: 1,
+            orientation: 'HORIZONTAL',
+            length: parseInt(el.dataset.shipLength),
+            name: el.dataset.shipName
+        }));
+
+        const getShipCells = ship => Array.from({ length: ship.length }, (_, i) => ({
+            x: ship.x + (ship.orientation === 'HORIZONTAL' ? i : 0),
+            y: ship.y + (ship.orientation === 'VERTICAL' ? i : 0)
+        }));
+
+        const isValid = ship => ship.x >= 1 && ship.x <= 10 && ship.y >= 1 && ship.y <= 10;
+
+        const isOutOfBounds = ship =>
+            (ship.orientation === 'HORIZONTAL' ? ship.x : ship.y) + ship.length - 1 > 10;
+
+        const hasOverlap = (index) => {
+            if (!isValid(ships[index])) return false;
+            const cells = getShipCells(ships[index]);
+            return ships.some((other, i) =>
+                i !== index && isValid(other) &&
+                getShipCells(other).some(oc => cells.some(c => c.x === oc.x && c.y === oc.y))
+            );
+        };
+
+        const render = () => {
+            board.querySelectorAll('.ship-preview').forEach(el => el.remove());
+
+            ships.forEach((ship, i) => {
+                if (!isValid(ship)) return;
+
+                const isError = isOutOfBounds(ship) || hasOverlap(i);
+                const isHorizontal = ship.orientation === 'HORIZONTAL';
+                const div = document.createElement('div');
+                div.className = 'ship-preview position-absolute rounded-1';
+                div.style.cssText = `
+                    left: ${(ship.x - 1) * 10}%;
+                    top: ${(ship.y - 1) * 10}%;
+                    width: ${(isHorizontal ? ship.length : 1) * 10}%;
+                    height: ${(isHorizontal ? 1 : ship.length) * 10}%;
+                    padding: 2px;
+                `;
+                div.innerHTML = `
+                    <div class="w-100 h-100 rounded-1 d-flex align-items-center justify-content-center ${isError ? 'bg-danger' : 'bg-primary'}">
+                        <span class="text-white fw-bold" style="font-size: 8px; letter-spacing: 0.05em; ${isHorizontal ? '' : 'writing-mode: vertical-rl; transform: rotate(180deg);'}">${ship.name}</span>
+                    </div>
+                `;
+                board.appendChild(div);
+            });
+        };
+
+        const readInputs = () => {
+            ships.forEach((ship, i) => {
+                const get = field => document.querySelector(`[data-ship-index="${i}"][data-field="${field}"]`);
+                const parse = el => el?.value.trim() ? parseInt(el.value) || null : null;
+
+                ship.x = parse(get('x'));
+                ship.y = parse(get('y'));
+                ship.orientation = document.querySelector(`[data-ship-index="${i}"][data-field="orientation"]:checked`)?.value || 'HORIZONTAL';
+            });
+        };
+
+        document.querySelectorAll('.ship-input').forEach(input => {
+            input.addEventListener(input.type === 'radio' ? 'change' : 'input', () => {
+                readInputs();
+                render();
+            });
+        });
+
+        readInputs();
+        render();
+    });
+</script>
