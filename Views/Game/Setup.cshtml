@@ -1,0 +1,56 @@
+@using Microsoft.AspNetCore.Identity
+@using Battleship.Models;
+
+@inject UserManager<User> UserManager
+
+@model Battleship.Models.SetupViewModel
+
+@{
+    ViewData["Title"] = "Game Setup";
+}
+
+<div class="min-vh-100 py-5 px-3">
+    <h1>Place Your Ships</h1>
+    <form method="post">
+        @for (int i = 0; i < Model.Ships.Count; i++)
+        {
+                <h2>@Model.Ships[i].Type.GetDisplayName()</h2>
+                
+            <div class="position-group form-group">
+                <label asp-for="Ships[i].X">X</label>
+                <input asp-for="Ships[i].X" min="1" max="10" />
+            </div>
+
+            <div class="position-group form-group">
+                <label asp-for="Ships[i].Y">Y</label>
+                <input asp-for="Ships[i].Y" min="1" max="10" />
+            </div>
+
+                <!-- @foreach( var c in System.Enum.GetValues(typeof(ShipOrientation)))
+                {
+                    <input type="radio" asp-for="Ships[i].Orientation" value="@((int)c)" />
+                    <label asp-for="Ships[i].Orientation">@c</label>
+                } -->
+            
+            <div class="position-group form-group">
+                <label asp-for="Ships[i].Orientation">
+                    <input asp-for="Ships[i].Orientation" type="radio" value="HORIZONTAL" />
+                    Horizontal
+                </label>
+            </div>
+
+            <div class="position-group form-group">
+                <label asp-for="Ships[i].Orientation">
+                    <input asp-for="Ships[i].Orientation" type="radio" value="VERTICAL" />
+                    Vertical
+                </label>
+            </div>
+        }
+        <button type="submit">Ready</button>
+        @* <div class="form-group mb-3">
+            <label asp-for="X" class="control-label fw-bold">X</label>
+            <input asp-for="X" class="form-control" required type="number" min="0" step="0.01" />
+            <span asp-validation-for="X" class="text-danger"></span>
+        </div> *@
+    </form>
+</div>

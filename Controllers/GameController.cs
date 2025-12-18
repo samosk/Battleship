@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Battleship.Models;
+using NuGet.Protocol;
+using System.Text.Json;
 
 namespace Battleship.Controllers;
 
@@ -20,6 +22,44 @@ public class GameController : Controller
     public IActionResult Index()
     {
         return View();
+    }
+
+    [HttpGet]
+    public IActionResult Setup(int id)
+    {
+        var game = _context.Games.Find(id);
+        if (game == null) return NotFound();
+
+        var shipTypes = new List<ShipType> {
+            ShipType.CARRIER,
+            ShipType.BATTLESHIP,
+            ShipType.DESTROYER,
+            ShipType.SUBMARINE,
+            ShipType.PATROL_BOAT
+        };
+
+        var viewModel = new SetupViewModel
+        {
+            Game = game,
+            Ships = shipTypes.Select(shipType => new ShipViewModel()
+            {
+                X = 0,
+                Y = 0,
+                Orientation = ShipOrientation.HORIZONTAL,
+                Type = shipType,
+                IsMine = true,
+                IsSunk = false
+            }).ToList()
+        };
+
+        return View(viewModel);
+    }
+
+    [HttpPost]
+    public IActionResult Setup(int id, SetupViewModel vm)
+    {
+        // TODO: Set game state and so forth...
+        return Ok();
     }
 
     [HttpGet]
