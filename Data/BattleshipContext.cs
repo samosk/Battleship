@@ -22,12 +22,6 @@ public partial class BattleshipContext : IdentityDbContext<User>
     {
         base.OnModelCreating(modelBuilder); // Configures Identity tables
 
-        modelBuilder
-            .HasPostgresEnum<GameState>("game_state")
-            .HasPostgresEnum<ShipOrientation>("ship_orientation")
-            .HasPostgresEnum<ShipType>("ship_type")
-            .HasPostgresEnum<ShotOutcome>("shot_outcome");
-
         modelBuilder.Entity<Game>(entity =>
         {
             entity.HasKey(e => e.GameId).HasName("game_pk");

@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Battleship.Migrations
 {
     [DbContext(typeof(BattleshipContext))]
-    [Migration("20251217145456_CustomUserIdentity")]
-    partial class CustomUserIdentity
+    [Migration("20251218101822_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,13 +25,9 @@ namespace Battleship.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "game_state", new[] { "END", "PLAY", "SETUP" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "game_state", "game_state", new[] { "SETUP", "PLAY", "END" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ship_orientation", new[] { "HORIZONTAL", "VERTICAL" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ship_orientation", "ship_orientation", new[] { "HORIZONTAL", "VERTICAL" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ship_type", new[] { "BATTLESHIP", "CARRIER", "DESTROYER", "PATROL_BOAT", "SUBMARINE" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "ship_type", "ship_type", new[] { "CARRIER", "BATTLESHIP", "DESTROYER", "SUBMARINE", "PATROL_BOAT" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "shot_outcome", new[] { "HIT", "MISS", "SINK" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "shot_outcome", "shot_outcome", new[] { "HIT", "MISS", "SINK" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Battleship.Models.Game", b =>

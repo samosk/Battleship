@@ -8,20 +8,16 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Battleship.Migrations
 {
     /// <inheritdoc />
-    public partial class CustomUserIdentity : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:game_state", "END,PLAY,SETUP")
-                .Annotation("Npgsql:Enum:game_state.game_state", "SETUP,PLAY,END")
                 .Annotation("Npgsql:Enum:ship_orientation", "HORIZONTAL,VERTICAL")
-                .Annotation("Npgsql:Enum:ship_orientation.ship_orientation", "HORIZONTAL,VERTICAL")
                 .Annotation("Npgsql:Enum:ship_type", "BATTLESHIP,CARRIER,DESTROYER,PATROL_BOAT,SUBMARINE")
-                .Annotation("Npgsql:Enum:ship_type.ship_type", "CARRIER,BATTLESHIP,DESTROYER,SUBMARINE,PATROL_BOAT")
-                .Annotation("Npgsql:Enum:shot_outcome", "HIT,MISS,SINK")
-                .Annotation("Npgsql:Enum:shot_outcome.shot_outcome", "HIT,MISS,SINK");
+                .Annotation("Npgsql:Enum:shot_outcome", "HIT,MISS,SINK");
 
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
