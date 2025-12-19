@@ -1,0 +1,22 @@
+@model Battleship.Models.CreateViewModel
+
+@{
+    ViewData["Title"] = "Create Game";
+}
+
+<div class="min-vh-100 py-5 px-3">
+    <h1>New Game</h1>
+    <form method="post" asp-action="Create">
+        <div class="form-group mb-3">
+            <label asp-for="OpponentUserName" class="control-label fw-bold">Opponent User Name</label>
+            <input asp-for="OpponentUserName" class="form-control" required />
+            <span asp-validation-for="OpponentUserName" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="GameName" class="control-label fw-bold">Game Name</label>
+            <input asp-for="GameName" class="form-control" placeholder="Optional" />
+            <span asp-validation-for="GameName" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Create Game</button>
+    </form>
+</div>

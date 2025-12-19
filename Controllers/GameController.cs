@@ -25,6 +25,61 @@ public class GameController : Controller
 
     [HttpGet]
     [Authorize]
+    public IActionResult Create()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> CreateAsync(CreateViewModel vm)
+    {
+        var myUserId = _userManager.GetUserId(User);
+        if (myUserId == null)
+        {
+            return Unauthorized();
+        }
+
+        User? opponent = null;
+
+        if (vm.OpponentUserName == null)
+        {
+            ModelState.AddModelError("OpponentUserName", "You need to pick an opponent.");
+        }
+        else
+        {
+            opponent = await _userManager.FindByNameAsync(vm.OpponentUserName);
+            if (opponent == null)
+            {
+                ModelState.AddModelError("OpponentUserName", "No such user found.");
+            }
+            else if (opponent.Id == myUserId)
+            {
+                ModelState.AddModelError("OpponentUserName", "Pick someone other than yourself, you silly goose! 🪿");
+            }
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View(vm);
+        }
+
+        var game = new Game
+        {
+            Name = vm.GameName,
+            User1Id = myUserId,
+            User2Id = opponent!.Id,
+            ActiveUserId = myUserId,
+            State = GameState.SETUP
+        };
+
+        _context.Games.Add(game);
+        _context.SaveChanges();
+        return RedirectToAction("Board", new { id = game.GameId });
+    }
+
+    [HttpGet]
+    [Authorize]
     public IActionResult Setup(int id)
     {
         var game = _context.Games.Find(id);
