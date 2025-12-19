@@ -25,6 +25,34 @@ public class GameController : Controller
 
     [HttpGet]
     [Authorize]
+    public IActionResult List()
+    {
+        var userId = _userManager.GetUserId(User);
+        var myGames = _context.Games
+            .Where(g => g.User1Id == userId || g.User2Id == userId)
+            .Select(g => new GameViewModel
+            {
+                GameId = g.GameId,
+                Name = g.Name,
+                User1 = g.User1,
+                User1Id = g.User1Id,
+                User2 = g.User2,
+                User2Id = g.User2Id,
+                IsMyTurn = g.ActiveUserId == userId,
+                CreatedAt = g.CreatedAt,
+                State = g.State
+            })
+            .ToList();
+        myGames.ForEach(async gv =>
+        {
+            gv.User1 = gv.User1Id == null ? null : await _userManager.FindByIdAsync(gv.User1Id);
+            gv.User2 = gv.User2Id == null ? null : await _userManager.FindByIdAsync(gv.User2Id);
+        });
+        return View(myGames);
+    }
+
+    [HttpGet]
+    [Authorize]
     public IActionResult Create()
     {
         return View();

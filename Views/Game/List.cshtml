@@ -1,0 +1,63 @@
+@using Microsoft.AspNetCore.Identity
+@using Battleship.Models;
+@inject UserManager<User> UserManager
+@model List<GameViewModel>
+@{
+    ViewData["Title"] = "Game List";
+    var currentUser = await UserManager.GetUserAsync(User);
+}
+
+<div class="min-vh-100 py-5 px-3">
+    <div class="container">
+        <h1 class="mb-4">Your Games</h1>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info">You have no games yet. Start a new game!</div>
+        }
+        else
+        {
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Game</th>
+                        <th>Opponent</th>
+                        <th>Turn</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var game in Model)
+                    {
+                        var userId = currentUser?.Id;
+                        var opponent = game.User2;
+                        var gameHasName = game.Name == null;
+
+                        <tr class="position-relative">
+                            <td> <a asp-action="Board" asp-route-id="@(game.GameId)" class="stretched-link">@(game.Name ?? "Untitled Game")</a>
+                            </td>
+                            <td>@(opponent)</td>
+                            <td>
+                                @if (game.State == GameState.PLAY)
+                                {
+                                    <span class="badge @(game.IsMyTurn ? "bg-success" : "bg-secondary")">
+                                        @(game.IsMyTurn ? "Your Turn" : "Opponent's Turn")
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge @(game.State == GameState.PLAY ? "bg-primary" : "bg-secondary")">
+                                    @game.State
+                                </span>
+                            </td>
+                            <td>@game.CreatedAt?.ToString("dd MMMM yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <a asp-action="Create" class="btn btn-success mt-4">New Game</a>
+    </div>
+</div>
