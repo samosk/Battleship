@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Battleship.Models;
-using NuGet.Protocol;
-using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Battleship.Controllers;
@@ -38,22 +36,27 @@ public class GameController : Controller
             return Forbid();
         }
 
-        if (game.State != GameState.SETUP)
+        var myShipCount = _context.Ships
+            .Where(s => s.GameId == id && s.UserId == userId)
+            .Count();
+
+        var opponentShipCount = _context.Ships
+            .Where(s => s.GameId == id && s.UserId != userId)
+            .Count();
+
+        if (game.State != GameState.SETUP || (myShipCount > 0 && opponentShipCount > 0))
         {
             return RedirectToAction("Board", new { id });
         }
 
-        var shipTypes = new List<ShipType> {
-            ShipType.CARRIER,
-            ShipType.BATTLESHIP,
-            ShipType.DESTROYER,
-            ShipType.SUBMARINE,
-            ShipType.PATROL_BOAT
-        };
+        var isWaitingForOpponent = myShipCount > 0 && opponentShipCount == 0;
+
+        var shipTypes = Enum.GetValues<ShipType>();
 
         var viewModel = new SetupViewModel
         {
             Game = game,
+            IsWaitingForOpponent = isWaitingForOpponent,
             Ships = shipTypes.Select(shipType => new ShipViewModel()
             {
                 X = 0,
@@ -75,14 +78,55 @@ public class GameController : Controller
         var game = _context.Games.Find(id);
         if (game == null) return NotFound();
 
+        if (game.State != GameState.SETUP)
+        {
+            return BadRequest("This game has already started.");
+        }
+
         var userId = _userManager.GetUserId(User);
         if (userId != game.User1Id && userId != game.User2Id)
         {
             return Forbid();
         }
 
-        // TODO: Set game state and so forth...
-        return Ok();
+        var myShips = vm.Ships
+            .Select(shipVm => new Ship(shipVm))
+            .ToList();
+
+        var selectedShipTypes = myShips.Select(s => s.Type).ToList();
+        var expectedShipTypes = Enum.GetValues<ShipType>().ToList();
+        var areShipTypesCorrect =
+            (selectedShipTypes.Count() == expectedShipTypes.Count())
+            && !selectedShipTypes.Except(expectedShipTypes).Any();
+
+        if (!areShipTypesCorrect || myShips.Any(IsShipOutOfBounds) || AreShipsOverlapping(myShips))
+        {
+            return BadRequest("Invalid ship placement.");
+        }
+
+        myShips.ForEach(ship =>
+        {
+            ship.GameId = id;
+            ship.UserId = userId;
+            _context.Ships.Add(ship);
+        });
+
+        var opponentShips = _context.Ships
+            .Where(s => s.GameId == id && s.UserId != userId)
+            .ToList();
+
+        if (myShips.Count() > 0 && opponentShips.Count() > 0)
+        {
+            game.State = GameState.PLAY;
+            game.ActiveUserId = game.User1Id;
+            game.TurnCount = 1;
+
+            _context.SaveChanges();
+            return RedirectToAction("Board", new { id });
+        }
+
+        _context.SaveChanges();
+        return RedirectToAction("Setup", new { id });
     }
 
     [HttpGet]
@@ -256,6 +300,27 @@ public class GameController : Controller
         _context.Shots.Add(shot);
         _context.SaveChanges();
         return RedirectToAction("Board", new { id });
+    }
+
+    public static bool IsShipOutOfBounds(Ship ship)
+    {
+        if (ship.X < 1 || ship.Y < 1) return true;
+
+        if (ship.Orientation == ShipOrientation.HORIZONTAL)
+        {
+            return ship.X + GetShipLength(ship) - 1 > 10;
+        }
+        return ship.Y + GetShipLength(ship) - 1 > 10;
+    }
+
+    public static bool AreShipsOverlapping(List<Ship> boardShips)
+    {
+        var shipPositions = new List<Position>();
+
+        boardShips.ForEach(ship =>
+            shipPositions.Concat(GetPositionsForShip(ship)));
+
+        return shipPositions.Distinct().Count() != shipPositions.Count();
     }
 
     public static int GetShipLength(Ship ship)
