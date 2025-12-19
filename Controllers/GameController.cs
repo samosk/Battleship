@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Battleship.Models;
 using NuGet.Protocol;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Battleship.Controllers;
 
@@ -25,10 +26,22 @@ public class GameController : Controller
     }
 
     [HttpGet]
+    [Authorize]
     public IActionResult Setup(int id)
     {
         var game = _context.Games.Find(id);
         if (game == null) return NotFound();
+
+        var userId = _userManager.GetUserId(User);
+        if (userId != game.User1Id && userId != game.User2Id)
+        {
+            return Forbid();
+        }
+
+        if (game.State != GameState.SETUP)
+        {
+            return RedirectToAction("Board", new { id });
+        }
 
         var shipTypes = new List<ShipType> {
             ShipType.CARRIER,
@@ -56,19 +69,39 @@ public class GameController : Controller
     }
 
     [HttpPost]
+    [Authorize]
     public IActionResult Setup(int id, SetupViewModel vm)
     {
+        var game = _context.Games.Find(id);
+        if (game == null) return NotFound();
+
+        var userId = _userManager.GetUserId(User);
+        if (userId != game.User1Id && userId != game.User2Id)
+        {
+            return Forbid();
+        }
+
         // TODO: Set game state and so forth...
         return Ok();
     }
 
     [HttpGet]
+    [Authorize]
     public IActionResult Board(int id)
     {
         var game = _context.Games.Find(id);
         if (game == null) return NotFound();
-        
-        var userId = _userManager.GetUserId(HttpContext.User);
+
+        var userId = _userManager.GetUserId(User);
+        if (userId != game.User1Id && userId != game.User2Id)
+        {
+            return Forbid();
+        }
+
+        if (game.State == GameState.SETUP)
+        {
+            return RedirectToAction("Setup", new { id });
+        }
 
         var myShots = _context.Shots
             .Where(s => s.GameId == id && s.ShooterUserId == userId)
@@ -121,6 +154,7 @@ public class GameController : Controller
     }
 
     [HttpPost]
+    [Authorize]
     public IActionResult Shoot(int id, BoardViewModel vm)
     {
         // Due to difficulties with using multiple view models in the same view, we have gone with a janky solution.
@@ -128,14 +162,19 @@ public class GameController : Controller
 
         var game = _context.Games.Find(id);
         if (game == null) return NotFound();
+
+        var userId = _userManager.GetUserId(User);
+        if (userId != game.User1Id && userId != game.User2Id)
+        {
+            return Forbid();
+        }
+
         if (vm.SelectedShotPosition == null) return BadRequest();
 
         if (game.State != GameState.PLAY)
         {
             return BadRequest("Shooting is not allowed right now.");
         }
-
-        var userId = _userManager.GetUserId(HttpContext.User);
 
         if (game.ActiveUserId != userId)
         {
