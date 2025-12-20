@@ -398,12 +398,16 @@ public class GameController : Controller
 
     public static bool AreShipsOverlapping(List<Ship> boardShips)
     {
-        var shipPositions = new List<Position>();
+        var selectedPositions = new List<Position>();
 
         boardShips.ForEach(ship =>
-            shipPositions.Concat(GetPositionsForShip(ship)));
+            selectedPositions.AddRange(GetPositionsForShip(ship)));
 
-        return shipPositions.Distinct().Count() != shipPositions.Count();
+        var hasDuplicates = selectedPositions
+            .GroupBy(p => new { p.X, p.Y })
+            .Any(g => g.Count() > 1);
+
+        return hasDuplicates;
     }
 
     public static int GetShipLength(Ship ship)
