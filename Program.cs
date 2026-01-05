@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<BattleshipContext>(options => options.UseNpgsql(
+builder.Services.AddDbContext<Battleship.BattleshipDbContext>(options => options.UseNpgsql(
     builder.Configuration.GetConnectionString("Battleship"),
     o => o
         .MapEnum<GameState>("game_state")
@@ -16,7 +16,7 @@ builder.Services.AddDbContext<BattleshipContext>(options => options.UseNpgsql(
         .MapEnum<ShipOrientation>("ship_orientation")
         .MapEnum<ShotOutcome>("shot_outcome")));
 builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddEntityFrameworkStores<BattleshipContext>();
+    .AddEntityFrameworkStores<Battleship.BattleshipDbContext>();
 builder.Services.AddSignalR();
 
 var app = builder.Build();

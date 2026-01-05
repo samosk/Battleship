@@ -9,14 +9,14 @@ namespace Battleship.Controllers;
 
 public class GameController : Controller
 {
-    private readonly BattleshipContext _context;
+    private readonly BattleshipDbContext _dbContext;
     private readonly IHubContext<GameHub> _hubContext;
     private readonly UserManager<User> _userManager;
     private readonly ILogger<GameController> _logger;
 
-    public GameController(BattleshipContext context, IHubContext<GameHub> hubContext, UserManager<User> userManager, ILogger<GameController> logger)
+    public GameController(BattleshipDbContext dbContext, IHubContext<GameHub> hubContext, UserManager<User> userManager, ILogger<GameController> logger)
     {
-        _context = context;
+        _dbContext = dbContext;
         _hubContext = hubContext;
         _userManager = userManager;
         _logger = logger;
@@ -32,7 +32,7 @@ public class GameController : Controller
     public IActionResult List()
     {
         var userId = _userManager.GetUserId(User);
-        var myGames = _context.Games
+        var myGames = _dbContext.Games
             .Where(g => g.User1Id == userId || g.User2Id == userId)
             .Select(g => new GameViewModel
             {
@@ -106,8 +106,8 @@ public class GameController : Controller
             State = GameState.SETUP
         };
 
-        _context.Games.Add(game);
-        _context.SaveChanges();
+        _dbContext.Games.Add(game);
+        _dbContext.SaveChanges();
         return RedirectToAction("Board", new { id = game.GameId });
     }
 
@@ -115,7 +115,7 @@ public class GameController : Controller
     [Authorize]
     public IActionResult Setup(int id)
     {
-        var game = _context.Games.Find(id);
+        var game = _dbContext.Games.Find(id);
         if (game == null) return NotFound();
 
         var userId = _userManager.GetUserId(User);
@@ -124,11 +124,11 @@ public class GameController : Controller
             return Forbid();
         }
 
-        var myShipCount = _context.Ships
+        var myShipCount = _dbContext.Ships
             .Where(s => s.GameId == id && s.UserId == userId)
             .Count();
 
-        var opponentShipCount = _context.Ships
+        var opponentShipCount = _dbContext.Ships
             .Where(s => s.GameId == id && s.UserId != userId)
             .Count();
 
@@ -163,7 +163,7 @@ public class GameController : Controller
     [Authorize]
     public async Task<IActionResult> Setup(int id, SetupViewModel vm)
     {
-        var game = _context.Games.Find(id);
+        var game = _dbContext.Games.Find(id);
         if (game == null) return NotFound();
 
         if (game.State != GameState.SETUP)
@@ -196,10 +196,10 @@ public class GameController : Controller
         {
             ship.GameId = id;
             ship.UserId = userId;
-            _context.Ships.Add(ship);
+            _dbContext.Ships.Add(ship);
         });
 
-        var opponentShips = _context.Ships
+        var opponentShips = _dbContext.Ships
             .Where(s => s.GameId == id && s.UserId != userId)
             .ToList();
 
@@ -209,12 +209,12 @@ public class GameController : Controller
             game.ActiveUserId = game.User1Id;
             game.TurnCount = 1;
 
-            _context.SaveChanges();
+            _dbContext.SaveChanges();
             await _hubContext.Clients.All.SendAsync("GameUpdated", id.ToString());
             return RedirectToAction("Board", new { id });
         }
 
-        _context.SaveChanges();
+        _dbContext.SaveChanges();
         return RedirectToAction("Setup", new { id });
     }
 
@@ -222,7 +222,7 @@ public class GameController : Controller
     [Authorize]
     public IActionResult Board(int id)
     {
-        var game = _context.Games.Find(id);
+        var game = _dbContext.Games.Find(id);
         if (game == null) return NotFound();
 
         var userId = _userManager.GetUserId(User);
@@ -236,15 +236,15 @@ public class GameController : Controller
             return RedirectToAction("Setup", new { id });
         }
 
-        var myShots = _context.Shots
+        var myShots = _dbContext.Shots
             .Where(s => s.GameId == id && s.ShooterUserId == userId)
             .ToList();
 
-        var opponentShots = _context.Shots
+        var opponentShots = _dbContext.Shots
             .Where(s => s.GameId == id && s.ShooterUserId != userId)
             .ToList();
 
-        var myShips = _context.Ships
+        var myShips = _dbContext.Ships
             .Where(s => s.GameId == id && s.UserId == userId)
             .Select(s => new ShipViewModel()
             {
@@ -257,7 +257,7 @@ public class GameController : Controller
             })
             .ToList();
 
-        var opponentShips = _context.Ships
+        var opponentShips = _dbContext.Ships
             .Where(s => s.GameId == id && s.UserId != userId)
             .Select(s => new ShipViewModel()
             {
@@ -293,7 +293,7 @@ public class GameController : Controller
         // Due to difficulties with using multiple view models in the same view, we have gone with a janky solution.
         // Everything inside BoardViewModel is null except for SelectedShotPosition.
 
-        var game = _context.Games.Find(id);
+        var game = _dbContext.Games.Find(id);
         if (game == null) return NotFound();
 
         var userId = _userManager.GetUserId(User);
@@ -328,7 +328,7 @@ public class GameController : Controller
             return BadRequest();
         }
 
-        var myShots = _context.Shots
+        var myShots = _dbContext.Shots
             .Where(s => s.GameId == id && s.ShooterUserId == userId)
             .ToList();
 
@@ -350,7 +350,7 @@ public class GameController : Controller
 
         var myShotsNew = myShots.Append(shot).ToList();
 
-        var opponentShips = _context.Ships
+        var opponentShips = _dbContext.Ships
             .Where(s => s.GameId == id && s.UserId != userId)
             .ToList();
 
@@ -385,10 +385,10 @@ public class GameController : Controller
                 game.TurnCount++;
             }
         }
-        _context.Shots.Add(shot);
+        _dbContext.Shots.Add(shot);
 
         game.ModifiedAt = DateTime.Now;
-        _context.SaveChanges();
+        _dbContext.SaveChanges();
 
         await _hubContext.Clients.All.SendAsync("GameUpdated", id.ToString());
 

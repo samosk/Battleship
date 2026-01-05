@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Battleship.Migrations
 {
-    [DbContext(typeof(BattleshipContext))]
+    [DbContext(typeof(BattleshipDbContext))]
     [Migration("20251218101822_InitialMigration")]
     partial class InitialMigration
     {

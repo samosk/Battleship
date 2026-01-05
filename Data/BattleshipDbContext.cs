@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Battleship;
 
-public partial class BattleshipContext : IdentityDbContext<User>
+public partial class BattleshipDbContext : IdentityDbContext<User>
 {
-    public BattleshipContext()
+    public BattleshipDbContext()
     { }
 
-    public BattleshipContext(DbContextOptions<BattleshipContext> options)
+    public BattleshipDbContext(DbContextOptions<BattleshipDbContext> options)
         : base(options)
     { }
 

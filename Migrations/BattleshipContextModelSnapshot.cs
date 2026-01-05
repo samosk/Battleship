@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Battleship.Migrations
 {
-    [DbContext(typeof(BattleshipContext))]
-    partial class BattleshipContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(BattleshipDbContext))]
+    partial class BattleshipDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
