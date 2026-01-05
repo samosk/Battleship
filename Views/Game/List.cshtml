@@ -5,6 +5,7 @@
 @{
     ViewData["Title"] = "Game List";
     var currentUser = await UserManager.GetUserAsync(User);
+    List<GameViewModel> sortedGameList = Model.OrderByDescending(game=>game.ModifiedAt).ToList();
 }
 
 <div class="min-vh-100 py-5 px-3">
@@ -25,10 +26,11 @@
                         <th>Turn</th>
                         <th>Status</th>
                         <th>Created</th>
+                        <th>Modified</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var game in Model)
+                    @foreach (var game in sortedGameList)
                     {
                         var userId = currentUser?.Id;
                         var opponent = game.User2;
@@ -51,7 +53,8 @@
                                     @game.State
                                 </span>
                             </td>
-                            <td>@game.CreatedAt?.ToString("dd MMMM yyyy")</td>
+                            <td>@game.CreatedAt?.ToString("d MMMM yyyy")</td>
+                            <td>@game.ModifiedAt?.ToString("d MMMM HH:mm ")</td>
                         </tr>
                     }
                 </tbody>

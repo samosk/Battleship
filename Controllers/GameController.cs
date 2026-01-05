@@ -40,6 +40,7 @@ public class GameController : Controller
                 User2Id = g.User2Id,
                 IsMyTurn = g.ActiveUserId == userId,
                 CreatedAt = g.CreatedAt,
+                ModifiedAt = g.ModifiedAt,
                 State = g.State
             })
             .ToList();
@@ -379,8 +380,9 @@ public class GameController : Controller
                 game.TurnCount++;
             }
         }
-
         _context.Shots.Add(shot);
+        
+        game.ModifiedAt = DateTime.Now;
         _context.SaveChanges();
         return RedirectToAction("Board", new { id });
     }
