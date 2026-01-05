@@ -128,61 +128,73 @@
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const board = document.getElementById('preview-board');
-        const ships = [...document.querySelectorAll('.ship-range[data-field="x"]')].map(el => ({
-            x: 1,
-            y: 1,
-            orientation: 'HORIZONTAL',
-            length: parseInt(el.dataset.shipLength),
-            name: el.dataset.shipName
-        }));
+@section Scripts {
+    <script>
+        const connection = new signalR.HubConnectionBuilder().withUrl("/SignalR/Game").build();
+        connection.start();
 
-        const getShipCells = ship => Array.from({ length: ship.length }, (_, i) => ({
-            x: ship.x + (ship.orientation === 'HORIZONTAL' ? i : 0),
-            y: ship.y + (ship.orientation === 'VERTICAL' ? i : 0)
-        }));
+        connection.on("GameUpdated", gameId => {
+            if (gameId === "@Model.Game.GameId") {
+                location.reload();
+            }
+        });
+    </script>
 
-        const isValid = ship => ship.x >= 1 && ship.x <= 10 && ship.y >= 1 && ship.y <= 10;
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const board = document.getElementById('preview-board');
+            const ships = [...document.querySelectorAll('.ship-range[data-field="x"]')].map(el => ({
+                x: 1,
+                y: 1,
+                orientation: 'HORIZONTAL',
+                length: parseInt(el.dataset.shipLength),
+                name: el.dataset.shipName
+            }));
 
-        const isOutOfBounds = ship =>
-            (ship.orientation === 'HORIZONTAL' ? ship.x : ship.y) + ship.length - 1 > 10;
+            const getShipCells = ship => Array.from({ length: ship.length }, (_, i) => ({
+                x: ship.x + (ship.orientation === 'HORIZONTAL' ? i : 0),
+                y: ship.y + (ship.orientation === 'VERTICAL' ? i : 0)
+            }));
 
-        const hasOverlap = (index) => {
-            if (!isValid(ships[index])) return false;
-            const cells = getShipCells(ships[index]);
-            return ships.some((other, i) =>
-                i !== index && isValid(other) &&
-                getShipCells(other).some(oc => cells.some(c => c.x === oc.x && c.y === oc.y))
-            );
-        };
+            const isValid = ship => ship.x >= 1 && ship.x <= 10 && ship.y >= 1 && ship.y <= 10;
 
-        const render = () => {
-            board.querySelectorAll('.ship-preview').forEach(el => el.remove());
+            const isOutOfBounds = ship =>
+                (ship.orientation === 'HORIZONTAL' ? ship.x : ship.y) + ship.length - 1 > 10;
 
-            ships.forEach((ship, i) => {
-                if (!isValid(ship)) return;
+            const hasOverlap = (index) => {
+                if (!isValid(ships[index])) return false;
+                const cells = getShipCells(ships[index]);
+                return ships.some((other, i) =>
+                    i !== index && isValid(other) &&
+                    getShipCells(other).some(oc => cells.some(c => c.x === oc.x && c.y === oc.y))
+                );
+            };
 
-                const isError = isOutOfBounds(ship) || hasOverlap(i);
-                const isHorizontal = ship.orientation === 'HORIZONTAL';
-                const div = document.createElement('div');
-                div.className = 'ship-preview position-absolute rounded-1';
-                div.style.cssText = `
-                    left: ${(ship.x - 1) * 10}%;
-                    top: ${(ship.y - 1) * 10}%;
-                    width: ${(isHorizontal ? ship.length : 1) * 10}%;
-                    height: ${(isHorizontal ? 1 : ship.length) * 10}%;
-                    padding: 2px;
-                `;
-                div.innerHTML = `
-                    <div class="w-100 h-100 rounded-1 d-flex align-items-center justify-content-center ${isError ? 'bg-danger' : 'bg-primary'}">
-                        <span class="text-white fw-bold" style="font-size: 8px; letter-spacing: 0.05em; ${isHorizontal ? '' : 'writing-mode: vertical-rl; transform: rotate(180deg);'}">${ship.name}</span>
-                    </div>
-                `;
-                board.appendChild(div);
-            });
-        };
+            const render = () => {
+                board.querySelectorAll('.ship-preview').forEach(el => el.remove());
+
+                ships.forEach((ship, i) => {
+                    if (!isValid(ship)) return;
+
+                    const isError = isOutOfBounds(ship) || hasOverlap(i);
+                    const isHorizontal = ship.orientation === 'HORIZONTAL';
+                    const div = document.createElement('div');
+                    div.className = 'ship-preview position-absolute rounded-1';
+                    div.style.cssText = `
+                        left: ${(ship.x - 1) * 10}%;
+                        top: ${(ship.y - 1) * 10}%;
+                        width: ${(isHorizontal ? ship.length : 1) * 10}%;
+                        height: ${(isHorizontal ? 1 : ship.length) * 10}%;
+                        padding: 2px;
+                    `;
+                    div.innerHTML = `
+                        <div class="w-100 h-100 rounded-1 d-flex align-items-center justify-content-center ${isError ? 'bg-danger' : 'bg-primary'}">
+                            <span class="text-white fw-bold" style="font-size: 8px; letter-spacing: 0.05em; ${isHorizontal ? '' : 'writing-mode: vertical-rl; transform: rotate(180deg);'}">${ship.name}</span>
+                        </div>
+                    `;
+                    board.appendChild(div);
+                });
+            };
 
         const readInputs = () => {
             ships.forEach((ship, i) => {
@@ -207,7 +219,8 @@
             });
         });
 
-        readInputs();
-        render();
-    });
-</script>
+            readInputs();
+            render();
+        });
+    </script>
+}

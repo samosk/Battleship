@@ -1,19 +1,23 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Battleship.Models;
+using Battleship.Hubs;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Battleship.Controllers;
 
 public class GameController : Controller
 {
     private readonly BattleshipContext _context;
+    private readonly IHubContext<GameHub> _hubContext;
     private readonly UserManager<User> _userManager;
     private readonly ILogger<GameController> _logger;
 
-    public GameController(BattleshipContext context, UserManager<User> userManager, ILogger<GameController> logger)
+    public GameController(BattleshipContext context, IHubContext<GameHub> hubContext, UserManager<User> userManager, ILogger<GameController> logger)
     {
         _context = context;
+        _hubContext = hubContext;
         _userManager = userManager;
         _logger = logger;
     }
@@ -157,7 +161,7 @@ public class GameController : Controller
 
     [HttpPost]
     [Authorize]
-    public IActionResult Setup(int id, SetupViewModel vm)
+    public async Task<IActionResult> Setup(int id, SetupViewModel vm)
     {
         var game = _context.Games.Find(id);
         if (game == null) return NotFound();
@@ -206,6 +210,7 @@ public class GameController : Controller
             game.TurnCount = 1;
 
             _context.SaveChanges();
+            await _hubContext.Clients.All.SendAsync("GameUpdated", id.ToString());
             return RedirectToAction("Board", new { id });
         }
 
@@ -283,7 +288,7 @@ public class GameController : Controller
 
     [HttpPost]
     [Authorize]
-    public IActionResult Shoot(int id, BoardViewModel vm)
+    public async Task<IActionResult> Shoot(int id, BoardViewModel vm)
     {
         // Due to difficulties with using multiple view models in the same view, we have gone with a janky solution.
         // Everything inside BoardViewModel is null except for SelectedShotPosition.
@@ -381,9 +386,12 @@ public class GameController : Controller
             }
         }
         _context.Shots.Add(shot);
-        
+
         game.ModifiedAt = DateTime.Now;
         _context.SaveChanges();
+
+        await _hubContext.Clients.All.SendAsync("GameUpdated", id.ToString());
+
         return RedirectToAction("Board", new { id });
     }
 

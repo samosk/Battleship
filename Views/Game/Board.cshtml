@@ -80,7 +80,7 @@
 
                             var shotHitsSunkShip = Model.OpponentSunkShips
                                 .Any(ship => GameController.IsPositionInShip(position, ship));
-                            
+
                             var shipClass = shotHitsSunkShip ? "bg-transparent"
                                 : (shot.Outcome == ShotOutcome.HIT) ? "bg-warning"
                                 : "bg-warning rounded-circle";
@@ -125,6 +125,19 @@
             </div>
         </div>
     </div>
+
+    @section Scripts {
+        <script>
+            const connection = new signalR.HubConnectionBuilder().withUrl("/SignalR/Game").build();
+            connection.start();
+
+            connection.on("GameUpdated", gameId => {
+                if (gameId === "@Model.Game.GameId") {
+                    location.reload();
+                }
+            });
+        </script>
+    }
 }
 
 <style>

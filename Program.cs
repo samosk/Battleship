@@ -1,5 +1,6 @@
 using Battleship;
 using Battleship.Models;
+using Battleship.Hubs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 
@@ -16,6 +17,7 @@ builder.Services.AddDbContext<BattleshipContext>(options => options.UseNpgsql(
         .MapEnum<ShotOutcome>("shot_outcome")));
 builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<BattleshipContext>();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -39,5 +41,7 @@ app.MapControllerRoute(
     pattern: "{controller=Game}/{action=List}/{id?}")
     .WithStaticAssets();
 app.MapRazorPages();
+
+app.MapHub<GameHub>("/SignalR/Game");
 
 app.Run();
