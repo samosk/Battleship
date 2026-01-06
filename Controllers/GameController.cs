@@ -43,7 +43,7 @@ public class GameController : Controller
                 ModifiedAt = g.ModifiedAt,
                 State = g.State
             })
-            .ToList();
+            .OrderByDescending(gv => gv.ModifiedAt).ToList();
         myGames.ForEach(async gv =>
         {
             gv.User1 = gv.User1Id == null ? null : await _userManager.FindByIdAsync(gv.User1Id);
