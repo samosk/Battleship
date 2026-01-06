@@ -4,62 +4,96 @@
 @model List<GameViewModel>
 @{
     ViewData["Title"] = "Game List";
-    var currentUser = await UserManager.GetUserAsync(User);
+    var loggedInUser = await UserManager.GetUserAsync(User);
+
+    var activeGames = Model.Where(g => g.State != GameState.END).ToList();
+    var completedGames = Model.Where(g => g.State == GameState.END).ToList();
 }
 
 <div class="min-vh-100 py-5 px-3">
     <div class="container">
-        <h1 class="mb-4">Your Games</h1>
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>Games</h1>
+            <a asp-action="Create" class="btn btn-primary">New Game</a>
+        </div>
 
-        @if (Model == null || !Model.Any())
+        <h2 class="mt-5 mb-4">Active</h2>
+        @if (activeGames == null || !activeGames.Any())
         {
-            <div class="alert alert-info">You have no games yet. Start a new game!</div>
+            <div class="alert alert-info">You have no active games. Start a new game!</div>
         }
         else
         {
             <table class="table table-striped table-hover">
                 <thead class="table-dark">
                     <tr>
-                        <th>Game</th>
+                        <th>Game Name</th>
                         <th>Opponent</th>
-                        <th>Turn</th>
                         <th>Status</th>
-                        <th>Created</th>
-                        <th>Modified</th>
+                        <th>Last Move</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var game in Model)
+                    @foreach (var game in activeGames)
                     {
-                        var userId = currentUser?.Id;
-                        var opponent = game.User2;
-                        var gameHasName = game.Name == null;
+                        var opponent = (game.User1Id == loggedInUser.Id) ? game.User2.UserName : game.User1.UserName;
 
                         <tr class="position-relative">
                             <td> <a asp-action="Board" asp-route-id="@(game.GameId)" class="stretched-link">@(game.Name ?? "Untitled Game")</a>
                             </td>
                             <td>@(opponent)</td>
                             <td>
-                                @if (game.State == GameState.PLAY)
+                                @if (game.State == GameState.SETUP)
                                 {
-                                    <span class="badge @(game.IsMyTurn ? "bg-success" : "bg-secondary")">
+                                    <span class="badge bg-warning text-dark">
+                                        Placing Ships
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge @(game.IsMyTurn ? "bg-primary" : "bg-secondary")">
                                         @(game.IsMyTurn ? "Your Turn" : "Opponent's Turn")
                                     </span>
                                 }
                             </td>
-                            <td>
-                                <span class="badge @(game.State == GameState.PLAY ? "bg-primary" : "bg-secondary")">
-                                    @game.State
-                                </span>
-                            </td>
-                            <td>@game.CreatedAt?.ToString("d MMMM yyyy")</td>
-                            <td>@game.ModifiedAt?.ToString("d MMMM HH:mm ")</td>
+                            <td>@game.ModifiedAt?.ToString("d MMM yyyy 'at' HH:mm")</td>
                         </tr>
                     }
                 </tbody>
             </table>
         }
 
-        <a asp-action="Create" class="btn btn-success mt-4">New Game</a>
+        @if (completedGames != null && completedGames.Any())
+        {
+            <h2 class="mt-5 mb-4">Completed</h2>
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Game Name</th>
+                        <th>Opponent</th>
+                        <th>Result</th>
+                        <th>Last Move</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var game in completedGames)
+                    {
+                        var opponent = (game.User1Id == loggedInUser.Id) ? game.User2.UserName : game.User1.UserName;
+
+                        <tr class="position-relative">
+                            <td> <a asp-action="Board" asp-route-id="@(game.GameId)" class="stretched-link">@(game.Name ?? "Untitled Game")</a>
+                            </td>
+                            <td>@(opponent)</td>
+                            <td>
+                                <span class="badge @(game.IsMyTurn ? "bg-primary" : "bg-danger")">
+                                    @(game.IsMyTurn ? "You Won" : "You Lost")
+                                </span>
+                            </td>
+                            <td>@game.ModifiedAt?.ToString("d MMM yyyy 'at' HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
     </div>
 </div>
