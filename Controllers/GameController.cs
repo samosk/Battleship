@@ -50,6 +50,7 @@ public class GameController : Controller
             .OrderByDescending(gv => gv.ModifiedAt).ToList();
         myGames.ForEach(async gv =>
         {
+            // Workaround for User1 and User2 navigation properties not working
             gv.User1 = gv.User1Id == null ? null : await _userManager.FindByIdAsync(gv.User1Id);
             gv.User2 = gv.User2Id == null ? null : await _userManager.FindByIdAsync(gv.User2Id);
         });
@@ -219,7 +220,7 @@ public class GameController : Controller
 
     [HttpGet]
     [Authorize]
-    public IActionResult Board(int id)
+    public async Task<IActionResult> Board(int id)
     {
         var game = _dbContext.Games.Find(id);
         if (game == null) return NotFound();
@@ -230,6 +231,9 @@ public class GameController : Controller
             return Forbid();
         }
 
+        // Workaround for User1 and User2 navigation properties not working
+        game.User1 = game.User1Id == null ? null : await _userManager.FindByIdAsync(game.User1Id);
+        game.User2 = game.User2Id == null ? null : await _userManager.FindByIdAsync(game.User2Id);
 
         var myShots = _dbContext.Shots
             .Where(s => s.GameId == id && s.ShooterUserId == userId)

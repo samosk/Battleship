@@ -9,32 +9,45 @@
 @{
     ViewData["Title"] = "Game Board";
 
-    var isMyTurn = Model.Game.ActiveUserId == @UserManager.GetUserId(User);
+    var loggedInUser = await UserManager.GetUserAsync(User);
+    var isMyTurn = Model.Game.ActiveUserId == loggedInUser.Id;
+    var opponent = (Model.Game.User1Id == loggedInUser.Id) ? Model.Game.User2.UserName : Model.Game.User1.UserName;
+
+    var mySunkShipsCount = Model.OpponentShots.Where(s => s.Outcome == ShotOutcome.SINK).Count();
+    var myAliveShipsCount = Model.MyShips.Count() - mySunkShipsCount;
+    var opponentAliveShipsCount = Model.MyShips.Count() - Model.OpponentSunkShips.Count();
 }
 
 @if (Model != null)
 {
     <div class="min-vh-100 py-5 px-3">
-        <h1 class="text-center text-dark fw-light text-uppercase fs-4 mb-5" style="letter-spacing: 0.1em;">
-            @if (Model.Game.State == GameState.SETUP)
-            {
-                @("Waiting for opponent")
-            }
-            else if (Model.Game.State == GameState.END)
-            {
-                @(isMyTurn ? "You Won!" : "You Lost!")
-            }
-            else
-            {
-                @(isMyTurn ? "Your Turn" : "Opponent's Turn")
-            }
-        </h1>
+        <div class="d-flex gap-4 flex-column flex-wrap flex-md-row justify-content-md-between align-items-md-center mb-5">
+            <h1>
+                @if (Model.Game.State == GameState.SETUP)
+                {
+                    @($"{opponent} is Placing Ships")
+                }
+                else if (Model.Game.State == GameState.END)
+                {
+                    @(isMyTurn ? "You Won!" : "You Lost!")
+                }
+                else
+                {
+                    @(isMyTurn ? "Your Turn" : $"{opponent}'s Turn")
+                }
+            </h1>
+            <div class="d-flex flex-column align-items-md-end">
+                <p class="text-uppercase fw-bold mb-0">@(Model.Game.Name ?? "Untitled Game")</p>
+                <p class="mb-0">Turn @Model.Game.TurnCount &bullet; Last Move @Model.Game.ModifiedAt?.ToString("d MMM yyyy 'at' HH:mm")</p>
+            </div>
+        </div>
 
-        <div class="d-flex flex-wrap justify-content-center gap-5">
+        <div class="d-flex flex-column flex-md-row gap-4">
             <!-- My Fleet -->
-            <div class="text-center">
-                <h2 class="text-secondary text-uppercase fs-6 fw-normal mb-3" style="letter-spacing: 0.08em;">My Fleet</h2>
-                <div class="rounded-1 p-0 position-relative" style="width: 320px; height: 320px;">
+            <div class="w-100">
+                <h2 class="text-center fs-6 fw-bold mb-0">@loggedInUser.UserName</h2>
+                <p class="text-center mb-3">@myAliveShipsCount Ships Alive</p>
+                <div class="rounded-1 p-0 w-100 position-relative" style="aspect-ratio: 1 / 1;">
                     <div class="board position-relative w-100 h-100">
                         @foreach (var ship in Model.MyShips)
                         {
@@ -66,10 +79,10 @@
             </div>
 
             <!-- Enemy Fleet -->
-            <div class="text-center">
-                <h2 class="text-secondary text-uppercase fs-6 fw-normal mb-3" style="letter-spacing: 0.08em;">Enemy Fleet
-                </h2>
-                <div class="rounded-1 p-0 position-relative" style="width: 320px; height: 320px;">
+            <div class="w-100">
+                <h2 class="text-center fs-6 fw-bold mb-0">@opponent</h2>
+                <p class="text-center mb-3">@opponentAliveShipsCount Ships Alive</p>
+                <div class="rounded-1 p-0 position-relative w-100" style="aspect-ratio: 1 / 1;">
                     <form method="post" action="/Game/Shoot/@Model.Game.GameId" class="board position-relative w-100 h-100">
                         @foreach (var sunkShip in Model.OpponentSunkShips)
                         {
@@ -103,14 +116,16 @@
                             {
                                 @for (int x = 1; x <= 10; x++)
                                 {
-                                    <input type="radio" name="SelectedShotPosition" value="@x,@y" class="z-1 opacity-25"
+                                    <input type="radio" name="SelectedShotPosition" value="@x,@y" required class="z-1 opacity-25"
                                         style="grid-column: @x / @(x + 1); grid-row: @y / @(y + 1);" />
                                 }
                             }
                         }
 
-                        <button type="submit" class="position-absolute top-100 start-50 translate-middle-x"
-                            disabled=@(Model.Game.State != GameState.PLAY || !isMyTurn)>Shoot</button>
+                        @if (Model.Game.State == GameState.PLAY && isMyTurn)
+                        {
+                            <button type="submit" class="btn btn-primary btn-lg text-uppercase position-absolute top-100 start-50 translate-middle-x mt-4">Shoot!</button>
+                        }
                     </form>
                 </div>
             </div>
