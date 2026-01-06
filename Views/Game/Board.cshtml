@@ -25,20 +25,20 @@
             <h1>
                 @if (Model.Game.State == GameState.SETUP)
                 {
-                    @($"{opponent} is Placing Ships")
+                    @($"{opponent} is placing ships")
                 }
                 else if (Model.Game.State == GameState.END)
                 {
-                    @(isMyTurn ? "You Won!" : "You Lost!")
+                    @(isMyTurn ? "You won!" : "You lost!")
                 }
                 else
                 {
-                    @(isMyTurn ? "Your Turn" : $"{opponent}'s Turn")
+                    @(isMyTurn ? "Your turn" : $"{opponent}'s turn")
                 }
             </h1>
             <div class="d-flex flex-column align-items-md-end">
-                <p class="text-uppercase fw-bold mb-0">@(Model.Game.Name ?? "Untitled Game")</p>
-                <p class="mb-0">Turn @Model.Game.TurnCount &bullet; Last Move @Model.Game.ModifiedAt?.ToString("d MMM yyyy 'at' HH:mm")</p>
+                <p class="text-uppercase fw-bold mb-0">@(Model.Game.Name ?? "Untitled game")</p>
+                <p class="mb-0">Turn @Model.Game.TurnCount &bullet; Last move @Model.Game.ModifiedAt?.ToString("d MMM yyyy 'at' HH:mm")</p>
             </div>
         </div>
 
@@ -46,7 +46,7 @@
             <!-- My Fleet -->
             <div class="w-100">
                 <h2 class="text-center fs-6 fw-bold mb-0">@loggedInUser.UserName</h2>
-                <p class="text-center mb-3">@myAliveShipsCount Ships Alive</p>
+                <p class="text-center mb-3">@myAliveShipsCount ships alive</p>
                 <div class="rounded-1 p-0 w-100 position-relative" style="aspect-ratio: 1 / 1;">
                     <div class="board position-relative w-100 h-100">
                         @foreach (var ship in Model.MyShips)
@@ -81,7 +81,7 @@
             <!-- Enemy Fleet -->
             <div class="w-100">
                 <h2 class="text-center fs-6 fw-bold mb-0">@opponent</h2>
-                <p class="text-center mb-3">@opponentAliveShipsCount Ships Alive</p>
+                <p class="text-center mb-3">@opponentAliveShipsCount ships alive</p>
                 <div class="rounded-1 p-0 position-relative w-100" style="aspect-ratio: 1 / 1;">
                     <form method="post" action="/Game/Shoot/@Model.Game.GameId" class="board position-relative w-100 h-100">
                         @foreach (var sunkShip in Model.OpponentSunkShips)

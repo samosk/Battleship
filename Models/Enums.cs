@@ -32,7 +32,7 @@ public enum ShipType
     [PgName("SUBMARINE")]
     SUBMARINE,
 
-    [Display(Name = "Patrol Boat")]
+    [Display(Name = "Patrol boat")]
     [PgName("PATROL_BOAT")]
     PATROL_BOAT
 }
