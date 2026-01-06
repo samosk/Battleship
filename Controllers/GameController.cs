@@ -211,11 +211,10 @@ public class GameController : Controller
 
             _dbContext.SaveChanges();
             await _hubContext.Clients.All.SendAsync("GameUpdated", id.ToString());
-            return RedirectToAction("Board", new { id });
         }
 
         _dbContext.SaveChanges();
-        return RedirectToAction("Setup", new { id });
+        return RedirectToAction("Board", new { id });
     }
 
     [HttpGet]
@@ -231,10 +230,6 @@ public class GameController : Controller
             return Forbid();
         }
 
-        if (game.State == GameState.SETUP)
-        {
-            return RedirectToAction("Setup", new { id });
-        }
 
         var myShots = _dbContext.Shots
             .Where(s => s.GameId == id && s.ShooterUserId == userId)
@@ -256,6 +251,11 @@ public class GameController : Controller
                 IsSunk = IsShipSunk(s, opponentShots)
             })
             .ToList();
+
+        if (game.State == GameState.SETUP && !myShips.Any())
+        {
+            return RedirectToAction("Setup", new { id });
+        }
 
         var opponentShips = _dbContext.Ships
             .Where(s => s.GameId == id && s.UserId != userId)

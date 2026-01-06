@@ -8,92 +8,88 @@
 }
 
 <div class="min-vh-100 py-5 px-3">
-    <h1 class="text-center text-dark fw-light text-uppercase fs-4 mb-5" style="letter-spacing: 0.1em;">Place Your Ships
-    </h1>
+    <h1 class="text-center text-dark fw-light text-uppercase fs-4 mb-5" style="letter-spacing: 0.1em;">Place Your Ships</h1>
 
     <div class="d-flex gap-5 justify-content-center">
-        @if(!@Model.IsWaitingForOpponent)
-        {
-            <!-- Ship Form Inputs (Left hand side) -->
-            <form method="post" class="d-flex flex-column align-items-center">
-                <div class="d-flex flex-wrap justify-content-center gap-4">
-                    @for (int i = 0; i < Model.Ships.Count; i++)
-                    {
-                        var shipLength = GameController.GetShipLength(Model.Ships[i]);
+        <!-- Ship Form Inputs (Left hand side) -->
+        <form method="post" class="d-flex flex-column align-items-center">
+            <div class="d-flex flex-wrap justify-content-center gap-4">
+                @for (int i = 0; i < Model.Ships.Count; i++)
+                {
+                    var shipLength = GameController.GetShipLength(Model.Ships[i]);
 
-                        <div class="bg-light border rounded-1 p-4" style="width: 240px;">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <h2 class="text-secondary text-uppercase fs-6 fw-normal m-0" style="letter-spacing: 0.08em;">
-                                    @Model.Ships[i].Type.GetDisplayName()</h2>
-                                <span class="text-secondary small">@shipLength cells</span>
-                            </div>
+                    <div class="bg-light border rounded-1 p-4" style="width: 240px;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="text-secondary text-uppercase fs-6 fw-normal m-0" style="letter-spacing: 0.08em;">
+                                @Model.Ships[i].Type.GetDisplayName()</h2>
+                            <span class="text-secondary small">@shipLength cells</span>
+                        </div>
 
-                            <div class="d-flex flex-column gap-3 mb-3">
-                                <input asp-for="Ships[i].Type" type="hidden" />
-                                <div>
-                                    <label asp-for="Ships[i].X" class="text-secondary small d-block mb-1">X</label>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <input type="range" class="form-range ship-range flex-grow-1"
-                                               min="1" max="10" step="1"
-                                               value="@Model.Ships[i].X"
-                                               data-ship-index="@i" data-ship-length="@shipLength"
-                                               data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="x"
-                                               oninput="this.nextElementSibling.value = this.value;" />
-                                        <input asp-for="Ships[i].X" type="number" min="1" max="10" step="1"
-                                               class="form-control form-control-sm ship-input text-center"
-                                               style="width: 60px;"
-                                               data-ship-index="@i" data-ship-length="@shipLength"
-                                               data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="x"
-                                               oninput="this.previousElementSibling.value = this.value;" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label asp-for="Ships[i].Y" class="text-secondary small d-block mb-1">Y</label>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <input type="range" class="form-range ship-range flex-grow-1"
-                                               min="1" max="10" step="1"
-                                               value="@Model.Ships[i].Y"
-                                               data-ship-index="@i" data-ship-length="@shipLength"
-                                               data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="y"
-                                               oninput="this.nextElementSibling.value = this.value;" />
-                                        <input asp-for="Ships[i].Y" type="number" min="1" max="10" step="1"
-                                               class="form-control form-control-sm ship-input text-center"
-                                               style="width: 60px;"
-                                               data-ship-index="@i" data-ship-length="@shipLength"
-                                               data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="y"
-                                               oninput="this.previousElementSibling.value = this.value;" />
-                                    </div>
-                                </div>
-                            </div>
-
+                        <div class="d-flex flex-column gap-3 mb-3">
+                            <input asp-for="Ships[i].Type" type="hidden" />
                             <div>
-                                <span class="text-secondary small d-block mb-2">Orientation</span>
-                                <div class="d-flex gap-3">
-                                    <label class="d-flex align-items-center gap-2 text-secondary small">
-                                        <input asp-for="Ships[i].Orientation" type="radio" value="HORIZONTAL"
-                                            class="form-check-input m-0 ship-input" data-ship-index="@i"
-                                            data-ship-length="@shipLength"
-                                            data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="orientation"
-                                            checked />
-                                        Horizontal
-                                    </label>
-                                    <label class="d-flex align-items-center gap-2 text-secondary small">
-                                        <input asp-for="Ships[i].Orientation" type="radio" value="VERTICAL"
-                                            class="form-check-input m-0 ship-input" data-ship-index="@i"
-                                            data-ship-length="@shipLength"
-                                            data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="orientation" />
-                                        Vertical
-                                    </label>
+                                <label asp-for="Ships[i].X" class="text-secondary small d-block mb-1">X</label>
+                                <div class="d-flex align-items-center gap-2">
+                                    <input type="range" class="form-range ship-range flex-grow-1"
+                                            min="1" max="10" step="1"
+                                            value="@Model.Ships[i].X"
+                                            data-ship-index="@i" data-ship-length="@shipLength"
+                                            data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="x"
+                                            oninput="this.nextElementSibling.value = this.value;" />
+                                    <input asp-for="Ships[i].X" type="number" min="1" max="10" step="1"
+                                            class="form-control form-control-sm ship-input text-center"
+                                            style="width: 60px;"
+                                            data-ship-index="@i" data-ship-length="@shipLength"
+                                            data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="x"
+                                            oninput="this.previousElementSibling.value = this.value;" />
+                                </div>
+                            </div>
+                            <div>
+                                <label asp-for="Ships[i].Y" class="text-secondary small d-block mb-1">Y</label>
+                                <div class="d-flex align-items-center gap-2">
+                                    <input type="range" class="form-range ship-range flex-grow-1"
+                                            min="1" max="10" step="1"
+                                            value="@Model.Ships[i].Y"
+                                            data-ship-index="@i" data-ship-length="@shipLength"
+                                            data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="y"
+                                            oninput="this.nextElementSibling.value = this.value;" />
+                                    <input asp-for="Ships[i].Y" type="number" min="1" max="10" step="1"
+                                            class="form-control form-control-sm ship-input text-center"
+                                            style="width: 60px;"
+                                            data-ship-index="@i" data-ship-length="@shipLength"
+                                            data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="y"
+                                            oninput="this.previousElementSibling.value = this.value;" />
                                 </div>
                             </div>
                         </div>
-                    }
-                </div>
 
-                <button type="submit" class="btn btn-dark px-5 py-2 mt-5 text-uppercase small fw-normal"
-                    style="letter-spacing: 0.08em;">Ready</button>
-            </form>
-        }
+                        <div>
+                            <span class="text-secondary small d-block mb-2">Orientation</span>
+                            <div class="d-flex gap-3">
+                                <label class="d-flex align-items-center gap-2 text-secondary small">
+                                    <input asp-for="Ships[i].Orientation" type="radio" value="HORIZONTAL"
+                                        class="form-check-input m-0 ship-input" data-ship-index="@i"
+                                        data-ship-length="@shipLength"
+                                        data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="orientation"
+                                        checked />
+                                    Horizontal
+                                </label>
+                                <label class="d-flex align-items-center gap-2 text-secondary small">
+                                    <input asp-for="Ships[i].Orientation" type="radio" value="VERTICAL"
+                                        class="form-check-input m-0 ship-input" data-ship-index="@i"
+                                        data-ship-length="@shipLength"
+                                        data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="orientation" />
+                                    Vertical
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <button type="submit" class="btn btn-dark px-5 py-2 mt-5 text-uppercase small fw-normal"
+                style="letter-spacing: 0.08em;">Ready</button>
+        </form>
 
         <!-- Preview Board (Right hand side) -->
         <div class="text-center position-sticky" style="top: 2rem;">

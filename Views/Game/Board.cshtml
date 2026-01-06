@@ -16,7 +16,11 @@
 {
     <div class="min-vh-100 py-5 px-3">
         <h1 class="text-center text-dark fw-light text-uppercase fs-4 mb-5" style="letter-spacing: 0.1em;">
-            @if (Model.Game.State == GameState.END)
+            @if (Model.Game.State == GameState.SETUP)
+            {
+                @("Waiting for opponent")
+            }
+            else if (Model.Game.State == GameState.END)
             {
                 @(isMyTurn ? "You Won!" : "You Lost!")
             }
