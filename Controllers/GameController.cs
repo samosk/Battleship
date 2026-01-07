@@ -12,14 +12,12 @@ public class GameController : Controller
     private readonly BattleshipDbContext _dbContext;
     private readonly IHubContext<GameHub> _hubContext;
     private readonly UserManager<User> _userManager;
-    private readonly ILogger<GameController> _logger;
 
-    public GameController(BattleshipDbContext dbContext, IHubContext<GameHub> hubContext, UserManager<User> userManager, ILogger<GameController> logger)
+    public GameController(BattleshipDbContext dbContext, IHubContext<GameHub> hubContext, UserManager<User> userManager)
     {
         _dbContext = dbContext;
         _hubContext = hubContext;
         _userManager = userManager;
-        _logger = logger;
     }
 
     public IActionResult Index()
