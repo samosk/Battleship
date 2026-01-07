@@ -1,20 +1,35 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Battleship.Models;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Identity;
+using Battleship.Hubs;
 
 namespace Battleship.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
+    private readonly BattleshipDbContext _dbContext;
+    private readonly IHubContext<GameHub> _hubContext;
+    private readonly UserManager<User> _userManager;
+    private readonly ILogger<GameController> _logger;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(BattleshipDbContext dbContext, IHubContext<GameHub> hubContext, UserManager<User> userManager, ILogger<GameController> logger)
     {
+        _dbContext = dbContext;
+        _hubContext = hubContext;
+        _userManager = userManager;
         _logger = logger;
     }
 
     public IActionResult Index()
     {
+        var userId = _userManager.GetUserId(User);
+        if(userId != null)
+        {
+            return RedirectToAction("List", "Game");
+        }
+
         return View();
     }
 

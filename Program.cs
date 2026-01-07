@@ -38,7 +38,7 @@ app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Game}/{action=List}/{id?}")
+    pattern: "{controller=Home}/{action=Index}")
     .WithStaticAssets();
 app.MapRazorPages();
 
