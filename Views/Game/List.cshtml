@@ -36,7 +36,7 @@
                 <tbody>
                     @foreach (var game in activeGames)
                     {
-                        var opponent = (game.User1Id == loggedInUser.Id) ? game.User2.UserName : game.User1.UserName;
+                        var opponent = (game.User1Id == loggedInUser?.Id) ? game.User2?.UserName : game.User1?.UserName;
 
                         <tr class="position-relative">
                             <td> <a asp-action="Board" asp-route-id="@(game.GameId)" class="stretched-link">@(game.Name ?? "Untitled game")</a>
@@ -78,7 +78,7 @@
                 <tbody>
                     @foreach (var game in completedGames)
                     {
-                        var opponent = (game.User1Id == loggedInUser.Id) ? game.User2.UserName : game.User1.UserName;
+                        var opponent = (game.User1Id == loggedInUser?.Id) ? game.User2?.UserName : game.User1?.UserName;
 
                         <tr class="position-relative">
                             <td> <a asp-action="Board" asp-route-id="@(game.GameId)" class="stretched-link">@(game.Name ?? "Untitled game")</a>

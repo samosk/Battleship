@@ -232,8 +232,10 @@ public class GameController : Controller
         }
 
         // Workaround for User1 and User2 navigation properties not working
-        game.User1 = game.User1Id == null ? null : await _userManager.FindByIdAsync(game.User1Id);
-        game.User2 = game.User2Id == null ? null : await _userManager.FindByIdAsync(game.User2Id);
+        var user1 = await _userManager.FindByIdAsync(game.User1Id);
+        if (user1 != null) game.User1 = user1;
+        var user2 = await _userManager.FindByIdAsync(game.User2Id);
+        if (user2 != null) game.User2 = user2;
 
         var myShots = _dbContext.Shots
             .Where(s => s.GameId == id && s.ShooterUserId == userId)

@@ -10,8 +10,8 @@
     ViewData["Title"] = "Game Board";
 
     var loggedInUser = await UserManager.GetUserAsync(User);
-    var isMyTurn = Model.Game.ActiveUserId == loggedInUser.Id;
-    var opponent = (Model.Game.User1Id == loggedInUser.Id) ? Model.Game.User2.UserName : Model.Game.User1.UserName;
+    var isMyTurn = Model.Game.ActiveUserId == loggedInUser?.Id;
+    var opponent = (Model.Game.User1Id == loggedInUser?.Id) ? Model.Game.User2.UserName : Model.Game.User1.UserName;
 
     var mySunkShipsCount = Model.OpponentShots.Where(s => s.Outcome == ShotOutcome.SINK).Count();
     var myAliveShipsCount = Model.MyShips.Count() - mySunkShipsCount;
@@ -45,7 +45,7 @@
         <div class="d-flex flex-column flex-md-row gap-4">
             <!-- My Fleet -->
             <div class="w-100">
-                <h2 class="text-center fs-6 fw-bold mb-0">@loggedInUser.UserName</h2>
+                <h2 class="text-center fs-6 fw-bold mb-0">@loggedInUser?.UserName</h2>
                 <p class="text-center mb-3">@myAliveShipsCount ships alive</p>
                 <div class="rounded-1 p-0 w-100 position-relative" style="aspect-ratio: 1 / 1;">
                     <div class="board position-relative w-100 h-100">
