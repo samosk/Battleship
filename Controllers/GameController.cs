@@ -276,15 +276,11 @@ public class GameController : Controller
             })
             .ToList();
 
-        var opponentSunkShips = opponentShips
-            .Where(s => s.IsSunk)
-            .ToList();
-
         var viewModel = new BoardViewModel
         {
             Game = game,
             MyShips = myShips,
-            OpponentSunkShips = opponentSunkShips,
+            OpponentShips = opponentShips,
             MyShots = myShots,
             OpponentShots = opponentShots
         };

@@ -13,9 +13,14 @@
     var isMyTurn = Model.Game.ActiveUserId == loggedInUser?.Id;
     var opponent = (Model.Game.User1Id == loggedInUser?.Id) ? Model.Game.User2.UserName : Model.Game.User1.UserName;
 
+    var opponentSunkShips = Model.OpponentShips
+        .Where(s => s.IsSunk)
+        .ToList();
+    var opponentVisibleShips = (Model.Game.State == GameState.END) ? Model.OpponentShips : opponentSunkShips;
+
     var mySunkShipsCount = Model.OpponentShots.Where(s => s.Outcome == ShotOutcome.SINK).Count();
     var myAliveShipsCount = Model.MyShips.Count() - mySunkShipsCount;
-    var opponentAliveShipsCount = Model.MyShips.Count() - Model.OpponentSunkShips.Count();
+    var opponentAliveShipsCount = Model.MyShips.Count() - opponentSunkShips.Count();
 }
 
 @if (Model != null)
@@ -84,16 +89,16 @@
                 <p class="text-center mb-3">@opponentAliveShipsCount ships alive</p>
                 <div class="rounded-1 p-0 position-relative w-100" style="aspect-ratio: 1 / 1;">
                     <form method="post" action="/Game/Shoot/@Model.Game.GameId" class="board position-relative w-100 h-100">
-                        @foreach (var sunkShip in Model.OpponentSunkShips)
+                        @foreach (var ship in opponentVisibleShips)
                         {
                             var spriteUrl =
                                 "/img/ship-" +
-                                sunkShip.Type.GetDisplayName().ToLower().Replace(" ", "-") +
-                                (sunkShip.Orientation == ShipOrientation.HORIZONTAL ? "-horizontal" : "-vertical") +
-                                "-sunk.svg";
+                                ship.Type.GetDisplayName().ToLower().Replace(" ", "-") +
+                                (ship.Orientation == ShipOrientation.HORIZONTAL ? "-horizontal" : "-vertical") +
+                                (ship.IsSunk ? "-sunk.svg" : ".svg");
 
                             <div class="rounded-1 position-relative"
-                                style="background-image: url(@spriteUrl); background-size: cover; grid-column: @(sunkShip.StartColumn) / @(sunkShip.EndColumn); grid-row: @(sunkShip.StartRow) / @(sunkShip.EndRow);">
+                                style="background-image: url(@spriteUrl); background-size: cover; grid-column: @(ship.StartColumn) / @(ship.EndColumn); grid-row: @(ship.StartRow) / @(ship.EndRow);">
                             </div>
                         }
 
