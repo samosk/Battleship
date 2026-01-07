@@ -10,81 +10,79 @@
 <div class="min-vh-100 py-5 px-3">
     <h1 class="mb-5">Place your ships</h1>
 
-    <div class="d-flex gap-4 justify-content-start align-items-start">
+    <form method="post" class="d-flex gap-4 justify-content-start align-items-start">
         <!-- Ship Form Inputs (Left hand side) -->
-        <form method="post">
-            <div class="d-flex flex-wrap gap-4">
-                @for (int i = 0; i < Model.Ships.Count; i++)
-                {
-                    var shipLength = GameController.GetShipLength(Model.Ships[i]);
+        <div class="d-flex flex-wrap gap-4">
+            @for (int i = 0; i < Model.Ships.Count; i++)
+            {
+                var shipLength = GameController.GetShipLength(Model.Ships[i]);
 
-                    <div class="bg-light border rounded-1 p-4" style="width: 240px;">
-                        <div class="d-flex justify-content-between mb-4">
-                            <h2 class="text-uppercase fs-6 fw-bold m-0 lh-base">@Model.Ships[i].Type.GetDisplayName()</h2>
-                            <span class="text-secondary m-0">@shipLength cells</span>
-                        </div>
+                <div class="bg-light border rounded-1 p-4" style="width: 240px;">
+                    <div class="d-flex justify-content-between mb-4">
+                        <h2 class="text-uppercase fs-6 fw-bold m-0 lh-base">@Model.Ships[i].Type.GetDisplayName()</h2>
+                        <span class="text-secondary m-0">@shipLength cells</span>
+                    </div>
 
-                        <div class="d-flex flex-column gap-3 mb-3">
-                            <input asp-for="Ships[i].Type" type="hidden" />
-                            <div>
-                                <label asp-for="Ships[i].X" class="small d-block mb-1">X</label>
-                                <div class="d-flex align-items-center gap-2">
-                                    <input type="range" class="form-range ship-range flex-grow-1"
-                                            min="1" max="10" step="1"
-                                            value="@Model.Ships[i].X"
-                                            data-ship-index="@i" data-ship-length="@shipLength"
-                                            data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="x"
-                                            oninput="this.nextElementSibling.value = this.value;" />
-                                    <input asp-for="Ships[i].X" type="number" min="1" max="10" step="1"
-                                            class="form-control form-control-sm ship-input text-center"
-                                            style="width: 60px;"
-                                            data-ship-index="@i" data-ship-length="@shipLength"
-                                            data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="x"
-                                            oninput="this.previousElementSibling.value = this.value;" />
-                                </div>
-                            </div>
-                            <div>
-                                <label asp-for="Ships[i].Y" class="small d-block mb-1">Y</label>
-                                <div class="d-flex align-items-center gap-2">
-                                    <input type="range" class="form-range ship-range flex-grow-1"
-                                            min="1" max="10" step="1"
-                                            value="@Model.Ships[i].Y"
-                                            data-ship-index="@i" data-ship-length="@shipLength"
-                                            data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="y"
-                                            oninput="this.nextElementSibling.value = this.value;" />
-                                    <input asp-for="Ships[i].Y" type="number" min="1" max="10" step="1"
-                                            class="form-control form-control-sm ship-input text-center"
-                                            style="width: 60px;"
-                                            data-ship-index="@i" data-ship-length="@shipLength"
-                                            data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="y"
-                                            oninput="this.previousElementSibling.value = this.value;" />
-                                </div>
-                            </div>
-                        </div>
-
+                    <div class="d-flex flex-column gap-3 mb-3">
+                        <input asp-for="Ships[i].Type" type="hidden" />
                         <div>
-                            <div class="d-flex gap-3">
-                                <label class="d-flex align-items-center gap-2 small">
-                                    <input asp-for="Ships[i].Orientation" type="radio" value="HORIZONTAL"
-                                        class="form-check-input m-0 ship-input" data-ship-index="@i"
-                                        data-ship-length="@shipLength"
-                                        data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="orientation"
-                                        checked />
-                                    Horizontal
-                                </label>
-                                <label class="d-flex align-items-center gap-2 small">
-                                    <input asp-for="Ships[i].Orientation" type="radio" value="VERTICAL"
-                                        class="form-check-input m-0 ship-input" data-ship-index="@i"
-                                        data-ship-length="@shipLength"
-                                        data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="orientation" />
-                                    Vertical
-                                </label>
+                            <label asp-for="Ships[i].X" class="small d-block mb-1">X</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="range" class="form-range ship-range flex-grow-1"
+                                        min="1" max="10" step="1"
+                                        value="@Model.Ships[i].X"
+                                        data-ship-index="@i" data-ship-length="@shipLength"
+                                        data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="x"
+                                        oninput="this.nextElementSibling.value = this.value;" />
+                                <input asp-for="Ships[i].X" type="number" min="1" max="10" step="1"
+                                        class="form-control form-control-sm ship-input text-center"
+                                        style="width: 60px;"
+                                        data-ship-index="@i" data-ship-length="@shipLength"
+                                        data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="x"
+                                        oninput="this.previousElementSibling.value = this.value;" />
+                            </div>
+                        </div>
+                        <div>
+                            <label asp-for="Ships[i].Y" class="small d-block mb-1">Y</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="range" class="form-range ship-range flex-grow-1"
+                                        min="1" max="10" step="1"
+                                        value="@Model.Ships[i].Y"
+                                        data-ship-index="@i" data-ship-length="@shipLength"
+                                        data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="y"
+                                        oninput="this.nextElementSibling.value = this.value;" />
+                                <input asp-for="Ships[i].Y" type="number" min="1" max="10" step="1"
+                                        class="form-control form-control-sm ship-input text-center"
+                                        style="width: 60px;"
+                                        data-ship-index="@i" data-ship-length="@shipLength"
+                                        data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="y"
+                                        oninput="this.previousElementSibling.value = this.value;" />
                             </div>
                         </div>
                     </div>
-                }
-            </div>
-        </form>
+
+                    <div>
+                        <div class="d-flex gap-3">
+                            <label class="d-flex align-items-center gap-2 small">
+                                <input asp-for="Ships[i].Orientation" type="radio" value="HORIZONTAL"
+                                    class="form-check-input m-0 ship-input" data-ship-index="@i"
+                                    data-ship-length="@shipLength"
+                                    data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="orientation"
+                                    checked />
+                                Horizontal
+                            </label>
+                            <label class="d-flex align-items-center gap-2 small">
+                                <input asp-for="Ships[i].Orientation" type="radio" value="VERTICAL"
+                                    class="form-check-input m-0 ship-input" data-ship-index="@i"
+                                    data-ship-length="@shipLength"
+                                    data-ship-name="@Model.Ships[i].Type.GetDisplayName()" data-field="orientation" />
+                                Vertical
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
 
         <!-- Preview Board (Right hand side) -->
         <div class="text-center position-sticky" style="top: 2rem;">
@@ -118,7 +116,7 @@
 
             <button type="submit" class="btn btn-primary mt-4">Ready</button>
         </div>
-    </div>
+    </form>
 </div>
 
 @section Scripts {
@@ -134,60 +132,59 @@
     </script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const board = document.getElementById('preview-board');
-            const ships = [...document.querySelectorAll('.ship-range[data-field="x"]')].map(el => ({
-                x: 1,
-                y: 1,
-                orientation: 'HORIZONTAL',
-                length: parseInt(el.dataset.shipLength),
-                name: el.dataset.shipName
-            }));
+        const board = document.getElementById('preview-board');
+        const ships = [...document.querySelectorAll('.ship-range[data-field="x"]')].map(el => ({
+            x: 1,
+            y: 1,
+            orientation: 'HORIZONTAL',
+            length: parseInt(el.dataset.shipLength),
+            name: el.dataset.shipName
+        }));
 
-            const getShipCells = ship => Array.from({ length: ship.length }, (_, i) => ({
-                x: ship.x + (ship.orientation === 'HORIZONTAL' ? i : 0),
-                y: ship.y + (ship.orientation === 'VERTICAL' ? i : 0)
-            }));
+        const getShipCells = ship => Array.from({ length: ship.length }, (_, i) => ({
+            x: ship.x + (ship.orientation === 'HORIZONTAL' ? i : 0),
+            y: ship.y + (ship.orientation === 'VERTICAL' ? i : 0)
+        }));
 
-            const isValid = ship => ship.x >= 1 && ship.x <= 10 && ship.y >= 1 && ship.y <= 10;
+        const isValid = ship => ship.x >= 1 && ship.x <= 10 && ship.y >= 1 && ship.y <= 10;
 
-            const isOutOfBounds = ship =>
-                (ship.orientation === 'HORIZONTAL' ? ship.x : ship.y) + ship.length - 1 > 10;
+        const isOutOfBounds = ship =>
+            (ship.orientation === 'HORIZONTAL' ? ship.x : ship.y) + ship.length - 1 > 10;
 
-            const hasOverlap = (index) => {
-                if (!isValid(ships[index])) return false;
-                const cells = getShipCells(ships[index]);
-                return ships.some((other, i) =>
-                    i !== index && isValid(other) &&
-                    getShipCells(other).some(oc => cells.some(c => c.x === oc.x && c.y === oc.y))
-                );
-            };
+        const hasOverlap = (index) => {
+            if (!isValid(ships[index])) return false;
+            const cells = getShipCells(ships[index]);
+            return ships.some((other, i) =>
+                i !== index && isValid(other) &&
+                getShipCells(other).some(oc => cells.some(c => c.x === oc.x && c.y === oc.y))
+            );
+        };
 
-            const render = () => {
-                board.querySelectorAll('.ship-preview').forEach(el => el.remove());
+        const render = () => {
+            board.querySelectorAll('.ship-preview').forEach(el => el.remove());
 
-                ships.forEach((ship, i) => {
-                    if (!isValid(ship)) return;
+            ships.forEach((ship, i) => {
+                if (!isValid(ship)) return;
 
-                    const isError = isOutOfBounds(ship) || hasOverlap(i);
-                    const isHorizontal = ship.orientation === 'HORIZONTAL';
-                    const div = document.createElement('div');
-                    div.className = 'ship-preview position-absolute rounded-1';
-                    div.style.cssText = `
-                        left: ${(ship.x - 1) * 10}%;
-                        top: ${(ship.y - 1) * 10}%;
-                        width: ${(isHorizontal ? ship.length : 1) * 10}%;
-                        height: ${(isHorizontal ? 1 : ship.length) * 10}%;
-                        padding: 2px;
-                    `;
-                    div.innerHTML = `
-                        <div class="w-100 h-100 rounded-1 d-flex align-items-center justify-content-center ${isError ? 'bg-danger' : 'bg-primary'}">
-                            <span class="text-white fw-bold" style="font-size: 8px; letter-spacing: 0.05em; ${isHorizontal ? '' : 'writing-mode: vertical-rl; transform: rotate(180deg);'}">${ship.name}</span>
-                        </div>
-                    `;
-                    board.appendChild(div);
-                });
-            };
+                const isError = isOutOfBounds(ship) || hasOverlap(i);
+                const isHorizontal = ship.orientation === 'HORIZONTAL';
+                const div = document.createElement('div');
+                div.className = 'ship-preview position-absolute rounded-1';
+                div.style.cssText = `
+                    left: ${(ship.x - 1) * 10}%;
+                    top: ${(ship.y - 1) * 10}%;
+                    width: ${(isHorizontal ? ship.length : 1) * 10}%;
+                    height: ${(isHorizontal ? 1 : ship.length) * 10}%;
+                    padding: 2px;
+                `;
+                div.innerHTML = `
+                    <div class="w-100 h-100 rounded-1 d-flex align-items-center justify-content-center ${isError ? 'bg-danger' : 'bg-primary'}">
+                        <span class="text-white fw-bold" style="font-size: 8px; letter-spacing: 0.05em; ${isHorizontal ? '' : 'writing-mode: vertical-rl; transform: rotate(180deg);'}">${ship.name}</span>
+                    </div>
+                `;
+                board.appendChild(div);
+            });
+        };
 
         const readInputs = () => {
             ships.forEach((ship, i) => {
@@ -212,8 +209,7 @@
             });
         });
 
-            readInputs();
-            render();
-        });
+        readInputs();
+        render();
     </script>
 }
