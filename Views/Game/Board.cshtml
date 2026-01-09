@@ -82,6 +82,7 @@
                             </div>
                         }
 
+                        @{ int index = 0; }
                         @foreach (var shot in Model.OpponentShots)
                         {
                             var spriteUrl =
@@ -89,10 +90,13 @@
                                 (shot.Outcome == ShotOutcome.MISS ? "miss-" : "hit-") +
                                 Random.Shared.Next(1, 5) +
                                 ".svg";
+                            var isLastShot = isMyTurn && (index == Model.OpponentShots.Count() - 1);
 
                             <div class="position-relative"
-                                style="background-image: url(@spriteUrl); background-size: cover; grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1);">
+                                style="background-image: url(@spriteUrl); @(isLastShot ? "animation: outline-appear 1s forwards;" : "") background-size: cover; grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1);">
                             </div>
+
+                            index++;
                         }
                     </div>
                 </div>
@@ -117,6 +121,7 @@
                             </div>
                         }
 
+                        @{ int index = 0; }
                         @foreach (var shot in Model.MyShots)
                         {
                             var spriteUrl =
@@ -124,10 +129,13 @@
                                 (shot.Outcome == ShotOutcome.MISS ? "miss-" : "hit-") +
                                 Random.Shared.Next(1, 5) +
                                 ".svg";
+                            var isLastShot = !isMyTurn && (index == Model.MyShots.Count() - 1);
 
                             <div class="position-relative"
-                                style="background-image: url(@spriteUrl); background-size: cover; grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1);">
+                                style="background-image: url(@spriteUrl); @(isLastShot ? "animation: outline-appear 1s forwards;" : "") background-size: cover; grid-column: @(shot.X) / @(shot.X + 1); grid-row: @(shot.Y) / @(shot.Y + 1);">
                             </div>
+
+                            index++;
                         }
 
                         @if (Model.Game.State == GameState.PLAY && isMyTurn)
@@ -179,5 +187,16 @@
         border: 1px solid #9dcee1;
         border-width: 0 1px 1px 0;
         box-sizing: border-box;
+    }
+
+    @@keyframes outline-appear {
+        0% {
+            outline: 2px dashed rgba(255, 0, 0, 0);
+            outline-offset: 50px;
+        }
+        100% {
+            outline: 2px dashed rgba(255, 0, 0, 1);
+            outline-offset: 4px;
+        }
     }
 </style>
