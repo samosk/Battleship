@@ -395,6 +395,25 @@ public class GameController : Controller
         return RedirectToAction("Board", new { id });
     }
 
+    [HttpPost]
+    [Authorize]
+    public IActionResult Delete(int id)
+    {
+        var game = _dbContext.Games.Find(id);
+        if (game == null) return NotFound();
+
+        var userId = _userManager.GetUserId(User);
+        if (userId != game.User1Id && userId != game.User2Id)
+        {
+            return Forbid();
+        }
+
+        _dbContext.Games.Remove(game);
+        _dbContext.SaveChanges();
+
+        return RedirectToAction("List");
+    }
+
     public static bool IsShipOutOfBounds(Ship ship)
     {
         if (ship.X < 1 || ship.Y < 1) return true;

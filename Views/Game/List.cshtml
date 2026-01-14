@@ -31,15 +31,17 @@
                         <th>Opponent</th>
                         <th>Status</th>
                         <th>Last move</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var game in activeGames)
                     {
+                        var name = game.Name ?? "Untitled game";
                         var opponent = (game.User1Id == loggedInUser?.Id) ? game.User2?.UserName : game.User1?.UserName;
 
                         <tr class="position-relative">
-                            <td> <a asp-action="Board" asp-route-id="@(game.GameId)" class="stretched-link">@(game.Name ?? "Untitled game")</a>
+                            <td> <a asp-action="Board" asp-route-id="@(game.GameId)" class="stretched-link">@(name)</a>
                             </td>
                             <td>@(opponent)</td>
                             <td>
@@ -57,6 +59,12 @@
                                 }
                             </td>
                             <td>@game.ModifiedAt?.ToString("d MMM yyyy 'at' HH:mm")</td>
+                            <td>
+                                <form asp-action="Delete" asp-route-id="@(game.GameId)" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger position-relative z-1"
+                                       onclick="return confirm('Delete @(name)?');">Delete</button>
+                                </form>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -73,15 +81,17 @@
                         <th>Opponent</th>
                         <th>Result</th>
                         <th>Last move</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var game in completedGames)
                     {
+                        var name = game.Name ?? "Untitled game";
                         var opponent = (game.User1Id == loggedInUser?.Id) ? game.User2?.UserName : game.User1?.UserName;
 
                         <tr class="position-relative">
-                            <td> <a asp-action="Board" asp-route-id="@(game.GameId)" class="stretched-link">@(game.Name ?? "Untitled game")</a>
+                            <td> <a asp-action="Board" asp-route-id="@(game.GameId)" class="stretched-link">@(name)</a>
                             </td>
                             <td>@(opponent)</td>
                             <td>
@@ -90,6 +100,12 @@
                                 </span>
                             </td>
                             <td>@game.ModifiedAt?.ToString("d MMM yyyy 'at' HH:mm")</td>
+                            <td>
+                                <form asp-action="Delete" asp-route-id="@(game.GameId)" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger position-relative z-1"
+                                       onclick="return confirm('Delete @(name)?');">Delete</button>
+                                </form>
+                            </td>
                         </tr>
                     }
                 </tbody>
